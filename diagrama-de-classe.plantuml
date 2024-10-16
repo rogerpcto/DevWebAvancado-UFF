@@ -1,0 +1,71 @@
+@startuml diagrama
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam nodesep 200
+skinparam ranksep 150
+
+class Usuario{
+    - Email : string
+    - Nome : string
+    - Senha : string
+}
+
+enum Perfil{
+    Administrador
+    Usuario
+}
+
+class Midia{
+    - Titulo : string
+    - Nota : float
+    - DataDeLancamento : DateTime
+}
+
+class Filme{
+    - Duracao : int
+}
+
+class Serie{
+}
+
+class Temporada{
+    - Numero : int
+}
+
+class Episodio{
+    - Duracao : int
+    - Numero : int
+}
+
+enum Genero{
+    Acao
+    Aventura
+    Drama
+    Romance
+}
+
+class Diretor{
+    - Nome : string
+}
+
+class Review{
+    - Comentario : string
+    - Nota : float
+}
+
+Midia <|-- Filme
+Midia <|-- Episodio
+Midia <|-- Serie
+Midia --> Diretor
+Midia --> Genero : - Genero : Genero
+
+Serie --> "1..*" Temporada : - Temporadas : Temporada[]
+Temporada --> "1..*" Episodio : - Episodios : Episodio[]
+
+Review --> "0..1" Midia : - Midia : Midia
+Review --> "0..1" Usuario : - Usuario : Usuario
+
+Usuario --> Perfil : - Perfil : Perfil
+Usuario --> "0..*" Usuario : - Amigos : Usuario[]
+
+@enduml
