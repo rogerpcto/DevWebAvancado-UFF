@@ -5,9 +5,15 @@ skinparam nodesep 200
 skinparam ranksep 150
 
 class Usuario{
-    - Email : string
-    - Nome : string
-    - Senha : string
+    + Email : string
+    + Nome : string
+    + Senha : string
+
+    + Logar() : void
+    + Logout() : void
+    + AdicionarMidia(midia) : void
+    + CriarReview(review) : void
+    + AdicionarAmigo(usuario) : void
 }
 
 enum Perfil{
@@ -16,25 +22,30 @@ enum Perfil{
 }
 
 class Midia{
-    - Titulo : string
-    - Nota : float
-    - DataDeLancamento : DateTime
+    + Titulo : string
+    + Nota : float
+    + DataDeLancamento : DateTime
 }
 
 class Filme{
-    - Duracao : int
+    + Duracao : int
 }
 
 class Serie{
+    + NumeroTemporadas() : int
+    + Duracao() : int
 }
 
 class Temporada{
-    - Numero : int
+    + Numero : int
+
+    + NumeroEpisodios() : int
+    + Duracao() : int
 }
 
 class Episodio{
-    - Duracao : int
-    - Numero : int
+    + Duracao : int
+    + Numero : int
 }
 
 enum Genero{
@@ -45,12 +56,12 @@ enum Genero{
 }
 
 class Diretor{
-    - Nome : string
+    + Nome : string
 }
 
 class Review{
-    - Comentario : string
-    - Nota : float
+    + Comentario : string
+    + Nota : float
 }
 
 Midia <|-- Filme
