@@ -1,0 +1,61 @@
+@startchen
+
+entity USUARIO{
+  Email : String <<key>>
+  Nome : String
+  Senha : String
+  Perfil : String
+}
+
+entity MIDIA{
+  Titulo : String <<key>>
+  Nota : Float
+  DataDeLancamento : Date <<key>>
+  Genero : String
+}
+
+entity FILME{
+  Duracao : Integer
+}
+
+entity TEMPORADA <<weak>>{
+  Numero : Integer <<key>>
+}
+
+entity EPISODIO{
+  Duracao : Integer
+}
+
+entity DIRETOR{
+  Nome : String
+}
+
+relationship TEMPORADA_SERIE{
+}
+
+relationship TEMPORADA_EPISODIO{
+  Numero : Integer
+}
+
+relationship DIRIGE{
+}
+
+relationship REVIEW{
+  Comentario : String
+  Nota : float
+}
+
+MIDIA ->- FILME
+MIDIA ->- EPISODIO
+
+EPISODIO -N- TEMPORADA_EPISODIO
+TEMPORADA_EPISODIO -1- TEMPORADA
+MIDIA -1- TEMPORADA_SERIE
+TEMPORADA_SERIE =N= TEMPORADA
+MIDIA -N- DIRIGE
+DIRETOR -1- DIRIGE
+
+USUARIO -N- REVIEW
+REVIEW -1- MIDIA
+
+@endchen
