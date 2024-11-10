@@ -1,0 +1,41 @@
+@startuml useCases
+left to right direction
+
+
+rectangle "Sistema de Gerenciamento de Mídia" {
+    actor "Usuário" as usuario
+    actor "Administrador" as admin
+    usecase "Criar conta" as UC1
+    usecase "Logar no sistema" as UC2
+    usecase "Adicionar uma mídia ao catálogo pessoal" as UC3
+    usecase "Criar uma review para uma mídia" as UC4
+    usecase "Buscar e visualizar detalhes de uma mídia" as UC5
+    usecase "Adicionar um amigo" as UC6
+    usecase "Visualizar reviews de uma mídia" as UC7
+    usecase "Deslogar do sistema" as UC8
+    usecase "Gerenciar perfis de usuário" as UC9
+    usecase "Adicionar mídias" as UC10
+    usecase "Apagar mídias" as UC11
+    usecase "Gerenciar reviews" as UC12
+}
+
+usecase "Importar mídias API Externa" as UC13
+
+usuario ---> UC1
+usuario ---> UC2
+usuario ---> UC3
+usuario ---> UC4
+usuario ---> UC5
+usuario ---> UC6
+usuario ---> UC7
+usuario ---> UC8
+
+admin ---> UC9
+admin ---> UC10
+admin ---> UC11
+admin ---> UC12
+usuario <|-- admin
+
+UC10 <... UC13 : include
+
+@enduml
