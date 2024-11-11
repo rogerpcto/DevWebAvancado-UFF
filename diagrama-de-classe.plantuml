@@ -25,6 +25,7 @@ class Midia{
     + Titulo : string
     + Nota : float
     + DataDeLancamento : DateTime
+    + PosterUrl : string
 }
 
 class Filme{
