@@ -13,7 +13,7 @@ rectangle "Sistema de Gerenciamento de Mídia" {
     usecase "Adicionar um amigo" as UC6
     usecase "Visualizar reviews de uma mídia" as UC7
     usecase "Deslogar do sistema" as UC8
-    usecase "Gerenciar perfis de usuário" as UC9
+    usecase "Gerenciar usuários" as UC9
     usecase "Apagar mídias" as UC10
     usecase "Gerenciar reviews" as UC11
 }
