@@ -1,4 +1,4 @@
-@startchen
+@startchen ER
 
 entity USUARIO{
   Email : String <<key>>
@@ -12,6 +12,7 @@ entity MIDIA{
   Nota : Float
   DataDeLancamento : Date <<key>>
   Genero : String
+  PosterUrl: String
 }
 
 entity FILME{
@@ -48,6 +49,10 @@ relationship REVIEW{
 entity SERIE{
 }
 
+relationship AMIZADE{
+}
+
+
 MIDIA =>= d {FILME, SERIE, EPISODIO}
 
 EPISODIO -N- TEMPORADA_EPISODIO
@@ -56,8 +61,9 @@ SERIE-1- TEMPORADA_SERIE
 TEMPORADA_SERIE =N= TEMPORADA
 MIDIA -N- DIRIGE
 DIRETOR -1- DIRIGE
-
 USUARIO -N- REVIEW
 REVIEW -1- MIDIA
+USUARIO -N- AMIZADE
+USUARIO -N- AMIZADE
 
 @endchen

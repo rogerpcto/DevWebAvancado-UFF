@@ -7,6 +7,13 @@ CREATE TABLE Usuario (
     perfil VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE AMIGOS (
+    id_usuario1 INTEGER PRIMARY KEY ,
+    id_usuario2 INTEGER PRIMARY KEY,
+    FOREIGN KEY (id_usuario1) REFERENCES Usuario(id),
+    FOREIGN KEY (id_usuario2) REFERENCES Usuario(id)
+);
+
 -- Tabela de diretores
 CREATE TABLE Diretor (
     id SERIAL PRIMARY KEY,
