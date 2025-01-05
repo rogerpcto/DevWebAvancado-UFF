@@ -1,0 +1,6 @@
+<form method="post" action="{% url 'Midia:buscar_filme' %}">
+    {% csrf_token %}
+    <label for="content">Content:</label>
+    <input type="text" id="content" name="Content" required />
+    <button type="submit">Submit</button>
+</form>
