@@ -7,10 +7,14 @@ from django.forms import ValidationError
 
 # Create your models here.
 
+PERFIS = (
+    ("ADMINISTRADOR", "Administrador"),
+    ("USUARIO", "Usuário")
+)
 
 # POR PADRÃO, O DJANGO JÁ POSSUI UMA CLASSE "USER", que contém campos que todo usuario tem, como username, senha, email
 class Usuario(AbstractUser):
-    perfil = models.CharField(max_length=50, null=False)
+    perfil = models.CharField(max_length=40, choices=PERFIS)
 
     def __str__(self):
         return self.first_name
