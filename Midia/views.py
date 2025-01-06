@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .models import PERFIS, Midia, Review, Usuario, Amigo
 import requests
 from django.http import JsonResponse
+from django.db.models import Q
 
 
 # Create your views here.
@@ -118,10 +119,13 @@ def buscar_filme(request):
                 "genres",
                 "id",
             ]
+            propriedades = ["Titulo", "Data_Lançamento", "Nota", "Genero", "id"]
             for media in json_data:
                 if media["originalLanguage"] == "en":
                     filtered_media = {
-                        key: media[key] for key in properties_to_filter if key in media
+                        propriedades[contador]: media[key]
+                        for contador, key in enumerate(properties_to_filter)
+                        if key in media
                     }
                     medias.append(filtered_media)
         else:
@@ -164,11 +168,15 @@ def buscar_serie(request):
                 "genres",
                 "id",
             ]
+            propriedades = ["Titulo", "Data_Lançamento", "Nota", "Genero", "id"]
             for media in json_data:
                 if media["originalLanguage"] == "en":
                     filtered_media = {
-                        key: media[key] for key in properties_to_filter if key in media
+                        propriedades[contador]: media[key]
+                        for contador, key in enumerate(properties_to_filter)
+                        if key in media
                     }
+
                     medias.append(filtered_media)
 
         else:
@@ -236,5 +244,36 @@ def fazer_amizade(request):
         if amigo:
             try:
                 Amigo.objects.create(usuario1=request.user, usuario2=amigo)
+                Amigo.objects.create(usuario1=amigo.user, usuario2=request.user)
             except Exception:
                 print(Exception)
+
+
+def desfazer_amizade(request):
+    if request.method == "DELETE":
+        dados = request.POST
+        id_amigo = dados.get("id_amigo")
+        amigo = Usuario.objects.get(id=id_amigo)
+        try:
+            amizade1 = Amigo.get(usuario1=request.user, usuario2=amigo)
+            amizade2 = Amigo.get(usuario1=amigo, usuario2=request.user)
+        except Exception:
+            return JsonResponse(
+                {"message": "Não foi encontrada amizade entre os usuários"},
+                status=401,  # Código HTTP para "Não Encontrado"
+            )
+        amizade1.delete()
+        amizade2.delete()
+        return JsonResponse({"message": "Amizade desfeita com sucesso!"}, status=200)
+
+
+def buscar_amigos(request):
+    if request.method == "GET":
+        query = Amigo.objects.filter(usuario1=request.user)
+        amigos = list(query.values)
+        if not amigos:
+            return JsonResponse(
+                {"message": "O usuário não possui amigos"},
+                status=401,  # Código HTTP para "Não Encontrado"
+            )
+        return JsonResponse(amigos, safe=False)
