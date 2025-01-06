@@ -1,6 +1,25 @@
+<h1>FILME</h1>
 <form method="post" action="{% url 'Midia:buscar_filme' %}">
     {% csrf_token %}
     <label for="content">Content:</label>
     <input type="text" id="content" name="Content" required />
     <button type="submit">Submit</button>
 </form>
+
+{% if medias %}
+    {% for media in medias %}
+        <h5>{{ media }}</h5>
+    {% endfor %}
+{% endif %}
+
+
+<h1>SERIE</h1>
+<form method="post" action="{% url 'Midia:buscar_serie' %}">
+    {% csrf_token %}
+    <label for="content">Content:</label>
+    <input type="text" id="content" name="Content"  />
+    <button type="submit">Submit</button>
+</form>
+
+
+
