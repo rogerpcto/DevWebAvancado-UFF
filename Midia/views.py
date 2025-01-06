@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.messages import constants
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from .models import PERFIS, Midia
+from .models import PERFIS, Midia, Review, Usuario, Amigo
 import requests
 from django.http import JsonResponse
 
@@ -97,27 +97,45 @@ def buscar_filme(request):
         return render(request, "buscar_filme.html")
 
     if request.method == "POST":
-        url = f"{URL}/Movie/Search"
-        params_to_search = ["Content"]
-        # TO DO: if the media is not in the first page, then we can add a feature to load more medias
-        query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
         dados = request.POST
-        for param in params_to_search:
-            if dados.get(param):
-                query_string[param] = dados.get(param)
 
-        response = requests.get(url, headers=HEADERS, params=query_string)
-        json_data = response.json()
-        medias = []
-        properties_to_filter = ["title", "releaseDate", "voteAverage", "genres", "id"]
-        for media in json_data:
-            if media["originalLanguage"] == "en":
-                filtered_media = {
-                    key: media[key] for key in properties_to_filter if key in media
-                }
-                medias.append(filtered_media)
-        print(medias)
+        if dados.get("api_externa").lower() == "true":
+            url = f"{URL}/Movie/Search"
+            params_to_search = ["Content"]
+            # TO DO: if the media is not in the first page, then we can add a feature to load more medias
+            query_string = {"Page": "1", "Language": "en-US", "Adult": "true"}
+            for param in params_to_search:
+                if dados.get(param):
+                    query_string[param] = dados.get(param)
 
+            response = requests.get(url, headers=HEADERS, params=query_string)
+            json_data = response.json()
+            medias = []
+            properties_to_filter = [
+                "title",
+                "releaseDate",
+                "voteAverage",
+                "genres",
+                "id",
+            ]
+            for media in json_data:
+                if media["originalLanguage"] == "en":
+                    filtered_media = {
+                        key: media[key] for key in properties_to_filter if key in media
+                    }
+                    medias.append(filtered_media)
+        else:
+            url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
+            params = {"nome": dados.get("Content")}  # Parâmetro de consulta
+            response = requests.get(url, params=params)
+            if response.status_code == 404:
+                return render(
+                    request,
+                    "buscar_filme.html",
+                    {"medias": {response.json()["message"]}},
+                )
+
+            medias = response.json()
         return render(request, "buscar_filme.html", {"medias": medias})
 
 
@@ -130,7 +148,7 @@ def buscar_serie(request):
         url = f"{URL}/Serie/Search"
         params_to_search = ["Content"]
         # TO DO: if the media is not in the first page, then we can add a feature to load more medias
-        if dados.get("api_externa"):
+        if dados.get("api_externa").lower() == "true":
             query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
             for param in params_to_search:
                 if dados.get(param):
@@ -156,20 +174,67 @@ def buscar_serie(request):
         else:
             url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
             params = {"nome": dados.get("Content")}  # Parâmetro de consulta
-            medias = requests.get(url, params=params).json()
+            response = requests.get(url, params=params)
+            if response.status_code == 404:
+                return render(
+                    request,
+                    "buscar_filme.html",
+                    {"medias": {response.json()["message"]}},
+                )
+
+            medias = response.json()
         return render(request, "buscar_filme.html", {"medias": medias})
 
 
 def buscar_midia(request):
     if request.method == "GET":
         nome = request.GET.get("nome", "")
-        midias = Midia.objects.filter(titulo=nome)
         if not nome:
             midias = Midia.objects.all()
-        midias = list(midias.values())
+        else:
+            midias = Midia.objects.filter(titulo=nome)
         if not midias:
             return JsonResponse(
                 {"message": "Mídias não encontradas"},
                 status=404,  # Código HTTP para "Não Encontrado"
             )
+        midias = list(midias.values())
         return JsonResponse(midias, safe=False)
+
+
+def listar_reviews(request):
+    if request.method == "GET":
+        user_reviews = Review.objects.filter(usuario=request.user).order_by(
+            "midia__titulo"
+        )
+        if not user_reviews:
+            return JsonResponse(
+                {"message": "O Usuário ainda não possui Reviews de uma mídia"},
+                status=404,  # Código HTTP para "Não Encontrado"
+            )
+        user_reviews = list(user_reviews.values())
+        return JsonResponse(user_reviews, safe=False)
+
+
+def buscar_usuarios(request):
+    if request.method == "GET":
+        nome_usuario = request.GET.get("nome", "")
+        if not nome_usuario:
+            usuarios = Usuario.objects.all()
+        else:
+            usuarios = Usuario.objects.filter(first_name=nome_usuario)
+        usuarios = list(usuarios.values)
+        return JsonResponse(usuarios, safe=False)
+
+
+def fazer_amizade(request):
+    if request.method == "GET":
+        dados = request.POST
+        id_amigo = dados.get("id_amigo")
+        if id_amigo:
+            amigo = Usuario.objects.get(id=id_amigo)
+        if amigo:
+            try:
+                Amigo.objects.create(usuario1=request.user, usuario2=amigo)
+            except Exception:
+                print(Exception)

@@ -1,9 +1,13 @@
 <h1>FILME</h1>
-<form method="post" action="{% url 'Midia:buscar_filme' %}">
+<form method="post" action="{% url 'Midia:buscar_filme' %}" id="form-filme">
     {% csrf_token %}
     <label for="content">Content:</label>
     <input type="text" id="content" name="Content" required />
+    <input type="hidden" name="api_externa" id="api-externa-filme" value="false">
     <button type="submit">Submit</button>
+    <button type="button" onclick="setApiExternaTrue('form-filme', 'api-externa-filme')">
+        Não achou o que procurava?
+    </button>
 </form>
 
 {% if medias %}
@@ -12,14 +16,23 @@
     {% endfor %}
 {% endif %}
 
-
 <h1>SERIE</h1>
-<form method="post" action="{% url 'Midia:buscar_serie' %}">
+<form method="post" action="{% url 'Midia:buscar_serie' %}" id="form-serie">
     {% csrf_token %}
     <label for="content">Content:</label>
-    <input type="text" id="content" name="Content"  />
+    <input type="text" id="content" name="Content" />
+    <input type="hidden" name="api_externa" id="api-externa-serie" value="false">
     <button type="submit">Submit</button>
+    <button type="button" onclick="setApiExternaTrue('form-serie', 'api-externa-serie')">
+        Não achou o que procurava?
+    </button>
 </form>
 
-
-
+<script>
+    function setApiExternaTrue(formId, hiddenInputId) {
+        // Muda o valor do campo oculto para "true"
+        document.getElementById(hiddenInputId).value = "true";
+        // Submete o formulário associado
+        document.getElementById(formId).submit();
+    }
+</script>
