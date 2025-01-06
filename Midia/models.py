@@ -33,6 +33,7 @@ class Amigo(models.Model):
 
 
 class Midia(models.Model):
+    id_midia = models.IntegerField(primary_key=True)
     titulo = models.CharField(max_length=255, null=False)
     nota = models.FloatField(null=False)
     data_lancamento = models.DateField(null=False)
