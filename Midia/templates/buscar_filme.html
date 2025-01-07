@@ -1,38 +1,208 @@
-<h1>FILME</h1>
-<form method="post" action="{% url 'Midia:buscar_filme' %}" id="form-filme">
-    {% csrf_token %}
-    <label for="content">Content:</label>
-    <input type="text" id="content" name="Content" required />
-    <input type="hidden" name="api_externa" id="api-externa-filme" value="false">
-    <button type="submit">Submit</button>
-    <button type="button" onclick="setApiExternaTrue('form-filme', 'api-externa-filme')">
-        Não achou o que procurava?
-    </button>
-</form>
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Busca de Mídia</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+      }
+      select,
+      input[type="text"] {
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .table-container {
+        margin-top: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+      table th,
+      table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      table th {
+        background-color: #f1f1f1;
+      }
+      .no-results {
+        text-align: center;
+        color: #999;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Busca de Mídia</h1>
+      <form method="post" id="form-midia">
+        {% csrf_token %}
 
-{% if medias %}
-    {% for media in medias %}
-        <h5>{{ media }}</h5>
-    {% endfor %}
-{% endif %}
+        <!-- Dropdown to select Filme or Serie -->
+        <label for="tipo">Tipo de Mídia:</label>
+        <select id="tipo" name="tipo" required>
+          <option value="filme">Filme</option>
+          <option value="serie">Série</option>
+        </select>
 
-<h1>SERIE</h1>
-<form method="post" action="{% url 'Midia:buscar_serie' %}" id="form-serie">
-    {% csrf_token %}
-    <label for="content">Content:</label>
-    <input type="text" id="content" name="Content" />
-    <input type="hidden" name="api_externa" id="api-externa-serie" value="false">
-    <button type="submit">Submit</button>
-    <button type="button" onclick="setApiExternaTrue('form-serie', 'api-externa-serie')">
-        Não achou o que procurava?
-    </button>
-</form>
+        <!-- Input field for search content -->
+        <label for="content">Conteúdo:</label>
+        <input
+          type="text"
+          id="content"
+          name="content"
+          value="{{ request.POST.content }}"
+          required
+        />
 
-<script>
-    function setApiExternaTrue(formId, hiddenInputId) {
-        // Muda o valor do campo oculto para "true"
+        <input
+          type="hidden"
+          name="api_externa"
+          id="api-externa"
+          value="false"
+        />
+
+        <div style="display: flex; justify-content: space-between">
+          <button type="submit">Buscar</button>
+          <button
+            type="submit"
+            onclick="setApiExternaTrue('form-midia', 'api-externa')"
+          >
+            <i class="fas fa-search"></i> Não achou o que procurava?
+          </button>
+        </div>
+      </form>
+
+      {% if medias %}
+      {% if not tipo %}
+        <h5>{{medias}}</h5>
+      {% elif tipo == 'filme' %}
+        <h5>Filmes Encontrados:</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Data de Lançamento</th>
+              <th>Nota</th>
+              <th>Gênero</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for media in medias %}
+            <tr>
+              <td>{{ media.titulo }}</td>
+              <td>{{ media.data_lancamento }}</td>
+              <td>{{ media.nota }}</td>
+              <td>{{ media.genero }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% elif tipo == 'serie' %}
+        <h5>Séries Encontradas:</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Nota</th>
+              <th>Gênero</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for media in medias %}
+            <tr>
+              <td>{{ media.Titulo }}</td>
+              <td>{{ media.Nota }}</td>
+              <td>{{ media.Genero|join:", " }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    {% else %}
+      <p class="no-results">
+        Nenhuma mídia encontrada. Tente novamente com outras palavras-chave.
+      </p>
+    {% endif %}
+    
+    <script>
+      document.getElementById("form-midia").onsubmit = function (event) {
+        event.preventDefault();
+
+        const tipo = document.getElementById("tipo").value;
+
+        const actionUrl =
+          tipo === "filme"
+            ? "{% url 'Midia:buscar_filme' %}"
+            : "{% url 'Midia:buscar_serie' %}";
+
+        console.log(actionUrl);
+
+        // Set the form action attribute to the correct URL
+        this.action = actionUrl;
+
+        // Now submit the form after logging the action URL
+        this.submit();
+      };
+
+      function setApiExternaTrue(formId, hiddenInputId) {
+        // Set the hidden input value to "true"
         document.getElementById(hiddenInputId).value = "true";
-        // Submete o formulário associado
+        // Submit the form
         document.getElementById(formId).submit();
-    }
-</script>
+      }
+    </script>
+  </body>
+</html>

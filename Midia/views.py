@@ -102,8 +102,7 @@ def buscar_filme(request):
 
         if dados.get("api_externa").lower() == "true":
             url = f"{URL}/Movie/Search"
-            params_to_search = ["Content"]
-            # TO DO: if the media is not in the first page, then we can add a feature to load more medias
+            params_to_search = ["content"]
             query_string = {"Page": "1", "Language": "en-US", "Adult": "true"}
             for param in params_to_search:
                 if dados.get(param):
@@ -119,7 +118,7 @@ def buscar_filme(request):
                 "genres",
                 "id",
             ]
-            propriedades = ["Titulo", "Data_Lançamento", "Nota", "Genero", "id"]
+            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
             for media in json_data:
                 if media["originalLanguage"] == "en":
                     filtered_media = {
@@ -130,7 +129,7 @@ def buscar_filme(request):
                     medias.append(filtered_media)
         else:
             url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
-            params = {"nome": dados.get("Content")}  # Parâmetro de consulta
+            params = {"nome": dados.get("content")}  # Parâmetro de consulta
             response = requests.get(url, params=params)
             if response.status_code == 404:
                 return render(
@@ -140,7 +139,7 @@ def buscar_filme(request):
                 )
 
             medias = response.json()
-        return render(request, "buscar_filme.html", {"medias": medias})
+        return render(request, "buscar_filme.html", {"medias": medias, "tipo": "filme"})
 
 
 def buscar_serie(request):
@@ -150,7 +149,7 @@ def buscar_serie(request):
     if request.method == "POST":
         dados = request.POST
         url = f"{URL}/Serie/Search"
-        params_to_search = ["Content"]
+        params_to_search = ["content"]
         # TO DO: if the media is not in the first page, then we can add a feature to load more medias
         if dados.get("api_externa").lower() == "true":
             query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
@@ -181,7 +180,7 @@ def buscar_serie(request):
 
         else:
             url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
-            params = {"nome": dados.get("Content")}  # Parâmetro de consulta
+            params = {"nome": dados.get("content")}  # Parâmetro de consulta
             response = requests.get(url, params=params)
             if response.status_code == 404:
                 return render(
@@ -191,7 +190,7 @@ def buscar_serie(request):
                 )
 
             medias = response.json()
-        return render(request, "buscar_filme.html", {"medias": medias})
+        return render(request, "buscar_filme.html", {"medias": medias, "tipo":"serie"})
 
 
 def buscar_midia(request):
@@ -203,7 +202,7 @@ def buscar_midia(request):
             midias = Midia.objects.filter(titulo=nome)
         if not midias:
             return JsonResponse(
-                {"message": "Mídias não encontradas"},
+                {"message": "Nenhuma Mídia encontrada"},
                 status=404,  # Código HTTP para "Não Encontrado"
             )
         midias = list(midias.values())
