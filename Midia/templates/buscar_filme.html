@@ -82,6 +82,17 @@
         color: #999;
         font-style: italic;
       }
+      .select-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .select-btn:hover {
+        background-color: #218838;
+      }
     </style>
   </head>
   <body>
@@ -93,8 +104,12 @@
         <!-- Dropdown to select Filme or Serie -->
         <label for="tipo">Tipo de Mídia:</label>
         <select id="tipo" name="tipo" required>
-          <option value="filme">Filme</option>
-          <option value="serie">Série</option>
+          <option value="filme" {% if request.POST.tipo == "filme" %}selected{% endif %}>
+            Filme
+          </option>
+          <option value="serie" {% if request.POST.tipo == "serie" %}selected{% endif %}>
+            Série
+          </option>
         </select>
 
         <!-- Input field for search content -->
@@ -124,59 +139,47 @@
           </button>
         </div>
       </form>
+      <div class="media-table" id="media-table">
+        {% if medias %}
+        <h5>Resultados Encontrados:</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Data de Lançamento</th>
+                    <th>Nota</th>
+                    <th>Gênero</th>
+                    <th>Selecionar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for media in medias %}
+                <tr>
+                    <td>{{ media.titulo }}</td>
+                    <td>{{ media.data_lancamento }}</td>
+                    <td>{{ media.nota }}</td>
+                    <td>{{ media.genero }}</td>
+                    <td>
+                        <button
+                            type="button"
+                            class="select-btn"
+                            onclick="selectMedia('{{ media.titulo|escapejs }}', '{{ media.data_lancamento|escapejs }}', '{{ media.nota|escapejs }}', '{{ media.genero|escapejs }}')"
+                        >
+                            Selecionar
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-results">
+            Nenhuma mídia encontrada. Tente novamente com outras palavras-chave.
+        </p>
+        {% endif %}
+    </div>
+    </div>
 
-      {% if medias %}
-      {% if not tipo %}
-        <h5>{{medias}}</h5>
-      {% elif tipo == 'filme' %}
-        <h5>Filmes Encontrados:</h5>
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Data de Lançamento</th>
-              <th>Nota</th>
-              <th>Gênero</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for media in medias %}
-            <tr>
-              <td>{{ media.titulo }}</td>
-              <td>{{ media.data_lancamento }}</td>
-              <td>{{ media.nota }}</td>
-              <td>{{ media.genero }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% elif tipo == 'serie' %}
-        <h5>Séries Encontradas:</h5>
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Nota</th>
-              <th>Gênero</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for media in medias %}
-            <tr>
-              <td>{{ media.Titulo }}</td>
-              <td>{{ media.Nota }}</td>
-              <td>{{ media.Genero|join:", " }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endif %}
-    {% else %}
-      <p class="no-results">
-        Nenhuma mídia encontrada. Tente novamente com outras palavras-chave.
-      </p>
-    {% endif %}
-    
     <script>
       document.getElementById("form-midia").onsubmit = function (event) {
         event.preventDefault();
@@ -188,21 +191,47 @@
             ? "{% url 'Midia:buscar_filme' %}"
             : "{% url 'Midia:buscar_serie' %}";
 
-        console.log(actionUrl);
-
-        // Set the form action attribute to the correct URL
         this.action = actionUrl;
 
-        // Now submit the form after logging the action URL
         this.submit();
       };
 
       function setApiExternaTrue(formId, hiddenInputId) {
-        // Set the hidden input value to "true"
         document.getElementById(hiddenInputId).value = "true";
-        // Submit the form
         document.getElementById(formId).submit();
       }
+      
+      function selectMedia(titulo, dataLancamento , nota, genero) {
+        const midiaSelecionada = {
+          titulo: titulo,
+          data_lancamento: dataLancamento,
+          nota: nota,
+          genero: genero,
+        };
+    
+         salvarMidia(midiaSelecionada);
+      }
+  function salvarMidia(midia) {
+    console.log(JSON.stringify(midia));
+    fetch("salvar_midia", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}", 
+      },
+      body: JSON.stringify(midia), 
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "success") {
+        alert("Mídia salva com sucesso!"); 
+      } else {
+        alert("Erro ao salvar a mídia."); 
+      }
+    });
+  }
+
+  // Modifique a função selectMedia para chamar salvarMidia após a seleção
     </script>
   </body>
 </html>

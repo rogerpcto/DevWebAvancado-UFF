@@ -8,6 +8,7 @@ from .models import PERFIS, Midia, Review, Usuario, Amigo
 import requests
 from django.http import JsonResponse
 from django.db.models import Q
+import json
 
 
 # Create your views here.
@@ -162,12 +163,12 @@ def buscar_serie(request):
             medias = []
             properties_to_filter = [
                 "name",
-                "releaseDate",
+                "firstAirDate",
                 "voteAverage",
                 "genres",
                 "id",
             ]
-            propriedades = ["Titulo", "Data_Lançamento", "Nota", "Genero", "id"]
+            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
             for media in json_data:
                 if media["originalLanguage"] == "en":
                     filtered_media = {
@@ -207,7 +208,27 @@ def buscar_midia(request):
             )
         midias = list(midias.values())
         return JsonResponse(midias, safe=False)
+    
+def salvar_midia(request):
+    if request.method == 'POST':
+        try:
+            midia_data = json.loads(request.body)
+            titulo = midia_data.get("titulo")
+            data_lancamento = midia_data.get("data_lancamento")
+            nota = midia_data.get("nota")
+            genero = midia_data.get("genero")
+            midia = Midia(
+                titulo=titulo,
+                data_lancamento=data_lancamento,
+                nota=nota,
+                genero=genero
+            )
+            midia.save()
 
+            return JsonResponse({'message': 'Data received', 'data': midia})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    return JsonResponse({'error': 'Invalid method'}, status=405)
 
 def listar_reviews(request):
     if request.method == "GET":
