@@ -16,90 +16,83 @@
       <h1>Busca de Mídia</h1>
       <form method="post" id="form-midia">
         {% csrf_token %}
+        <div class="form-group">
+          <label for="tipo">Tipo de Mídia:</label>
+          <select id="tipo" name="tipo" required>
+            <option value="filme" {% if request.POST.tipo == "filme" %}selected{% endif %}>Filme</option>
+            <option value="serie" {% if request.POST.tipo == "serie" %}selected{% endif %}>Série</option>
+          </select>
+        </div>
 
-        <!-- Dropdown to select Filme or Serie -->
-        <label for="tipo">Tipo de Mídia:</label>
-        <select id="tipo" name="tipo" required>
-          <option value="filme" {% if request.POST.tipo == "filme" %}selected{% endif %}>
-            Filme
-          </option>
-          <option value="serie" {% if request.POST.tipo == "serie" %}selected{% endif %}>
-            Série
-          </option>
-        </select>
+        <div class="form-group">
+          <label for="content">Conteúdo:</label>
+          <input
+            type="text"
+            id="content"
+            name="content"
+            value="{{ request.POST.content }}"
+            required
+          />
+        </div>
 
-        <!-- Input field for search content -->
-        <label for="content">Conteúdo:</label>
-        <input
-          type="text"
-          id="content"
-          name="content"
-          value="{{ request.POST.content }}"
-          required
-        />
+        <input type="hidden" name="api_externa" id="api-externa" value="false" />
 
-        <input
-          type="hidden"
-          name="api_externa"
-          id="api-externa"
-          value="false"
-        />
-
-        <div style="display: flex; justify-content: space-between">
-          <button type="submit">Buscar</button>
-          <button
+        <div class="form-actions">
+            <button type="submit">Buscar</button>
+            {% if midias %}
+            <button
             type="submit"
             onclick="setApiExternaTrue('form-midia', 'api-externa')"
-            style="display:none;"
             id="nao-achou-btn"
-          >
+            style="display: none;"
+            >
             <i class="fas fa-search"></i> Não achou o que procurava?
-          </button>
-        </div>
-        </div>
-      </form>
-      <div class="media-table" id="media-table">
-        {% if medias %}
-        <h5>Resultados Encontrados:</h5>
-        <table>
+            </button>
+            <script>
+            document.getElementById("nao-achou-btn").style.display = "block";
+            </script>
+            {% endif %}
+            </div>
+
+          </form>
+          
+          {% if midias.0.titulo %}
+          <div class="midia-table" id="midia-table">
+            <h5>Resultados Encontrados:</h5>
+            <table>
             <thead>
-          <tr>
+              <tr>
               <th>Nome</th>
               <th>Data de Lançamento</th>
               <th>Nota</th>
               <th>Gênero</th>
               <th>Selecionar</th>
-          </tr>
+              </tr>
             </thead>
             <tbody>
-          {% for media in medias %}
-          <tr>
-              <td>{{ media.titulo }}</td>
-              <td>{{ media.data_lancamento }}</td>
-              <td>{{ media.nota }}</td>
-              <td>{{ media.genero }}</td>
-              <td>
-            <button
-                type="button"
-                class="select-btn"
-                onclick="selectMedia('{{ media.titulo|escapejs }}', '{{ media.data_lancamento|escapejs }}', '{{ media.nota|escapejs }}', '{{ media.genero|escapejs }}', '{{ media.id|escapejs }}')"
-            >
-                Selecionar
-            </button>
-              </td>
-          </tr>
-          {% endfor %}
+              {% for midia in midias %}
+              <tr>
+                <td>{{ midia.titulo }}</td>
+                <td>{{ midia.data_lancamento }}</td>
+                <td>{{ midia.nota }}</td>
+                <td>{{ midia.genero }}</td>
+                <td>
+                <button
+                  type="button"
+                  class="select-btn"
+                  onclick="selectMedia('{{ midia.titulo|escapejs }}', '{{ midia.data_lancamento|escapejs }}', '{{ midia.nota|escapejs }}', '{{ midia.genero|escapejs }}', '{{ midia.id|escapejs }}')"
+                >
+                  Selecionar
+                </button>
+                </td>
+              </tr>
+              {% endfor %}
             </tbody>
-        </table>
-        {% else %}
-        <p class="no-results">
-            Nenhuma mídia encontrada. Tente novamente com outras palavras-chave.
-        </p>
-        <script>
-          document.getElementById("nao-achou-btn").style.display = "block";
-        </script>
-        {% endif %}
-    </div>
+            </table>
+          </div>
+          {% else %}
+          <p class="no-results">Nenhuma midia encontrada ainda.</p>
+          {% endif %}
     </div>
 
     <script>
@@ -107,14 +100,11 @@
         event.preventDefault();
 
         const tipo = document.getElementById("tipo").value;
-
-        const actionUrl =
-          tipo === "filme"
-            ? "{% url 'Midia:buscar_filme' %}"
-            : "{% url 'Midia:buscar_serie' %}";
+        const actionUrl = tipo === "filme"
+          ? "{% url 'Midia:buscar_filme' %}"
+          : "{% url 'Midia:buscar_serie' %}";
 
         this.action = actionUrl;
-
         this.submit();
       };
 
@@ -122,40 +112,41 @@
         document.getElementById(hiddenInputId).value = "true";
         document.getElementById(formId).submit();
       }
-      
+
       function selectMedia(titulo, dataLancamento , nota, genero, id) {
         const midiaSelecionada = {
           titulo: titulo,
           data_lancamento: dataLancamento,
           nota: nota,
           genero: genero,
-          id:id
+          id: id
         };
-         salvarMidia(midiaSelecionada);
+        salvarMidia(midiaSelecionada);
       }
-  function salvarMidia(midia) {
-    fetch("salvar_midia", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}", 
-      },
-      body: JSON.stringify(midia), 
-    })
-    .then((response) => {
-        if (response.status === 200) {
+
+      function salvarMidia(midia) {
+        fetch("salvar_midia", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify(midia),
+        })
+        .then((response) => {
+          if (response.status === 200) {
             return response.json();
-        } else {
+          } else {
             throw new Error('Erro ao salvar a mídia.');
-        }
-    })
-    .then((data) => {
-        alert("Mídia salva com sucesso!"); 
-    })
-    .catch((error) => {
-        alert(error.message); 
-    });
-  }
+          }
+        })
+        .then((data) => {
+          alert("Mídia salva com sucesso!");
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+      }
     </script>
   </body>
 </html>

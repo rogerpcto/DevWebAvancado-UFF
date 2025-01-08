@@ -1,32 +1,43 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: #f4f4f4;
   margin: 0;
   padding: 0;
 }
+
 .container {
   width: 80%;
   margin: 20px auto;
   padding: 20px;
-  background-color: white;
+  background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
+
 h1 {
   text-align: center;
   color: #333;
+  margin-bottom: 20px;
 }
+
 form {
   display: flex;
   flex-direction: column;
   gap: 15px;
   margin-bottom: 20px;
 }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
 label {
   font-weight: bold;
   margin-bottom: 5px;
   color: #333;
 }
+
 select,
 input[type="text"] {
   padding: 10px;
@@ -34,6 +45,7 @@ input[type="text"] {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 button {
   padding: 12px 20px;
   font-size: 1rem;
@@ -42,13 +54,22 @@ button {
   background-color: #007bff;
   color: white;
   border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
+
 button:hover {
   background-color: #0056b3;
 }
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
 .table-container {
   margin-top: 20px;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -57,20 +78,25 @@ table {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
+
 table th,
 table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
+
 table th {
   background-color: #f1f1f1;
+  font-weight: bold;
 }
+
 .no-results {
   text-align: center;
   color: #999;
   font-style: italic;
 }
+
 .select-btn {
   background-color: #28a745;
   color: white;
@@ -78,7 +104,9 @@ table th {
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
+
 .select-btn:hover {
   background-color: #218838;
 }

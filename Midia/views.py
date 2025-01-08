@@ -96,7 +96,7 @@ def criar_conta(request):
 def buscar_filme(request):
 
     if request.method == "GET":
-        return render(request, "buscar_filme.html")
+        return render(request, "buscar_filme.html", {"midias": ""})
 
     if request.method == "POST":
         dados = request.POST
@@ -111,7 +111,7 @@ def buscar_filme(request):
 
             response = requests.get(url, headers=HEADERS, params=query_string)
             json_data = response.json()
-            medias = []
+            midias = []
             properties_to_filter = [
                 "title",
                 "releaseDate",
@@ -120,14 +120,14 @@ def buscar_filme(request):
                 "id",
             ]
             propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
-            for media in json_data:
-                if media["originalLanguage"] == "en":
-                    filtered_media = {
-                        propriedades[contador]: media[key]
+            for midia in json_data:
+                if midia["originalLanguage"] == "en":
+                    filtered_midia = {
+                        propriedades[contador]: midia[key]
                         for contador, key in enumerate(properties_to_filter)
-                        if key in media
+                        if key in midia
                     }
-                    medias.append(filtered_media)
+                    midias.append(filtered_midia)
         else:
             url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
             params = {"nome": dados.get("content")}  # Parâmetro de consulta
@@ -136,11 +136,11 @@ def buscar_filme(request):
                 return render(
                     request,
                     "buscar_filme.html",
-                    {"medias": {response.json()["message"]}},
+                    {"midias": {response.json()["message"]}},
                 )
 
-            medias = response.json()
-        return render(request, "buscar_filme.html", {"medias": medias, "tipo": "filme"})
+            midias = response.json()
+        return render(request, "buscar_filme.html", {"midias": midias, "tipo": "filme"})
 
 
 def buscar_serie(request):
@@ -151,7 +151,7 @@ def buscar_serie(request):
         dados = request.POST
         url = f"{URL}/Serie/Search"
         params_to_search = ["content"]
-        # TO DO: if the media is not in the first page, then we can add a feature to load more medias
+        # TO DO: if the midia is not in the first page, then we can add a feature to load more midias
         if dados.get("api_externa").lower() == "true":
             query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
             for param in params_to_search:
@@ -160,7 +160,7 @@ def buscar_serie(request):
 
             response = requests.get(url, headers=HEADERS, params=query_string)
             json_data = response.json()
-            medias = []
+            midias = []
             properties_to_filter = [
                 "name",
                 "firstAirDate",
@@ -169,15 +169,15 @@ def buscar_serie(request):
                 "id",
             ]
             propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
-            for media in json_data:
-                if media["originalLanguage"] == "en":
-                    filtered_media = {
-                        propriedades[contador]: media[key]
+            for midia in json_data:
+                if midia["originalLanguage"] == "en":
+                    filtered_midia = {
+                        propriedades[contador]: midia[key]
                         for contador, key in enumerate(properties_to_filter)
-                        if key in media
+                        if key in midia
                     }
 
-                    medias.append(filtered_media)
+                    midias.append(filtered_midia)
 
         else:
             url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
@@ -187,11 +187,11 @@ def buscar_serie(request):
                 return render(
                     request,
                     "buscar_filme.html",
-                    {"medias": {response.json()["message"]}},
+                    {"midias": {response.json()["message"]}},
                 )
 
-            medias = response.json()
-        return render(request, "buscar_filme.html", {"medias": medias, "tipo":"serie"})
+            midias = response.json()
+        return render(request, "buscar_filme.html", {"midias": midias, "tipo":"serie"})
 
 
 def buscar_midia(request):
