@@ -1,99 +1,15 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static '/css/buscar_filme.css' %}">
     <title>Busca de Mídia</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        width: 80%;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-      }
-      h1 {
-        text-align: center;
-        color: #333;
-      }
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        margin-bottom: 20px;
-      }
-      label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #333;
-      }
-      select,
-      input[type="text"] {
-        padding: 10px;
-        font-size: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      button {
-        padding: 12px 20px;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border-radius: 4px;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      .table-container {
-        margin-top: 20px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-      }
-      table th,
-      table td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
-      table th {
-        background-color: #f1f1f1;
-      }
-      .no-results {
-        text-align: center;
-        color: #999;
-        font-style: italic;
-      }
-      .select-btn {
-        background-color: #28a745;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-      .select-btn:hover {
-        background-color: #218838;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
@@ -134,9 +50,12 @@
           <button
             type="submit"
             onclick="setApiExternaTrue('form-midia', 'api-externa')"
+            style="display:none;"
+            id="nao-achou-btn"
           >
             <i class="fas fa-search"></i> Não achou o que procurava?
           </button>
+        </div>
         </div>
       </form>
       <div class="media-table" id="media-table">
@@ -144,38 +63,41 @@
         <h5>Resultados Encontrados:</h5>
         <table>
             <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Data de Lançamento</th>
-                    <th>Nota</th>
-                    <th>Gênero</th>
-                    <th>Selecionar</th>
-                </tr>
+          <tr>
+              <th>Nome</th>
+              <th>Data de Lançamento</th>
+              <th>Nota</th>
+              <th>Gênero</th>
+              <th>Selecionar</th>
+          </tr>
             </thead>
             <tbody>
-                {% for media in medias %}
-                <tr>
-                    <td>{{ media.titulo }}</td>
-                    <td>{{ media.data_lancamento }}</td>
-                    <td>{{ media.nota }}</td>
-                    <td>{{ media.genero }}</td>
-                    <td>
-                        <button
-                            type="button"
-                            class="select-btn"
-                            onclick="selectMedia('{{ media.titulo|escapejs }}', '{{ media.data_lancamento|escapejs }}', '{{ media.nota|escapejs }}', '{{ media.genero|escapejs }}')"
-                        >
-                            Selecionar
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
+          {% for media in medias %}
+          <tr>
+              <td>{{ media.titulo }}</td>
+              <td>{{ media.data_lancamento }}</td>
+              <td>{{ media.nota }}</td>
+              <td>{{ media.genero }}</td>
+              <td>
+            <button
+                type="button"
+                class="select-btn"
+                onclick="selectMedia('{{ media.titulo|escapejs }}', '{{ media.data_lancamento|escapejs }}', '{{ media.nota|escapejs }}', '{{ media.genero|escapejs }}', '{{ media.id|escapejs }}')"
+            >
+                Selecionar
+            </button>
+              </td>
+          </tr>
+          {% endfor %}
             </tbody>
         </table>
         {% else %}
         <p class="no-results">
             Nenhuma mídia encontrada. Tente novamente com outras palavras-chave.
         </p>
+        <script>
+          document.getElementById("nao-achou-btn").style.display = "block";
+        </script>
         {% endif %}
     </div>
     </div>
@@ -201,18 +123,17 @@
         document.getElementById(formId).submit();
       }
       
-      function selectMedia(titulo, dataLancamento , nota, genero) {
+      function selectMedia(titulo, dataLancamento , nota, genero, id) {
         const midiaSelecionada = {
           titulo: titulo,
           data_lancamento: dataLancamento,
           nota: nota,
           genero: genero,
+          id:id
         };
-    
          salvarMidia(midiaSelecionada);
       }
   function salvarMidia(midia) {
-    console.log(JSON.stringify(midia));
     fetch("salvar_midia", {
       method: "POST",
       headers: {
@@ -221,17 +142,20 @@
       },
       body: JSON.stringify(midia), 
     })
-    .then((response) => response.json())
+    .then((response) => {
+        if (response.status === 200) {
+            return response.json();
+        } else {
+            throw new Error('Erro ao salvar a mídia.');
+        }
+    })
     .then((data) => {
-      if (data.status === "success") {
         alert("Mídia salva com sucesso!"); 
-      } else {
-        alert("Erro ao salvar a mídia."); 
-      }
+    })
+    .catch((error) => {
+        alert(error.message); 
     });
   }
-
-  // Modifique a função selectMedia para chamar salvarMidia após a seleção
     </script>
   </body>
 </html>

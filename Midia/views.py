@@ -200,7 +200,7 @@ def buscar_midia(request):
         if not nome:
             midias = Midia.objects.all()
         else:
-            midias = Midia.objects.filter(titulo=nome)
+            midias = Midia.objects.filter(titulo__icontains=nome)
         if not midias:
             return JsonResponse(
                 {"message": "Nenhuma Mídia encontrada"},
@@ -217,18 +217,20 @@ def salvar_midia(request):
             data_lancamento = midia_data.get("data_lancamento")
             nota = midia_data.get("nota")
             genero = midia_data.get("genero")
+            id = midia_data.get("id")
             midia = Midia(
                 titulo=titulo,
                 data_lancamento=data_lancamento,
                 nota=nota,
-                genero=genero
+                genero=genero,
+                id_midia=id
             )
             midia.save()
 
-            return JsonResponse({'message': 'Data received', 'data': midia})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    return JsonResponse({'error': 'Invalid method'}, status=405)
+
+    return JsonResponse({'message': 'Data received', 'data': midia.id_midia}, status=200)
 
 def listar_reviews(request):
     if request.method == "GET":
