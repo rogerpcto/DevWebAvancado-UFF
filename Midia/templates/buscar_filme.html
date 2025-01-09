@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{% static '/css/buscar_filme.css' %}">
     <title>Busca de Mídia</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
   </head>
   <body>
     <div class="container">
@@ -52,47 +48,47 @@
             document.getElementById("nao-achou-btn").style.display = "block";
             </script>
             {% endif %}
-            </div>
+        </div>
 
-          </form>
-          
-          {% if midias.0.titulo %}
-          <div class="midia-table" id="midia-table">
-            <h5>Resultados Encontrados:</h5>
-            <table>
-            <thead>
-              <tr>
+      </form>
+
+      {% if midias.0.titulo %}
+      <div class="midia-table" id="midia-table">
+        <h5>Resultados Encontrados:</h5>
+        <table>
+          <thead>
+            <tr>
               <th>Nome</th>
               <th>Data de Lançamento</th>
               <th>Nota</th>
               <th>Gênero</th>
               <th>Selecionar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for midia in midias %}
-              <tr>
-                <td>{{ midia.titulo }}</td>
-                <td>{{ midia.data_lancamento }}</td>
-                <td>{{ midia.nota }}</td>
-                <td>{{ midia.genero }}</td>
-                <td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for midia in midias %}
+            <tr>
+              <td>{{ midia.titulo }}</td>
+              <td>{{ midia.data_lancamento }}</td>
+              <td>{{ midia.nota }}</td>
+              <td>{{ midia.genero }}</td>
+              <td>
                 <button
                   type="button"
                   class="select-btn"
-                  onclick="selectMedia('{{ midia.titulo|escapejs }}', '{{ midia.data_lancamento|escapejs }}', '{{ midia.nota|escapejs }}', '{{ midia.genero|escapejs }}', '{{ midia.id|escapejs }}')"
+                  onclick="selectMedia('{{ midia.titulo|escapejs }}', '{{ midia.data_lancamento|escapejs }}', '{{ midia.nota|escapejs }}', '{{ midia.genero|escapejs }}', '{{ midia.id_midia|escapejs }}')"
                 >
                   Selecionar
                 </button>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-            </table>
-          </div>
-          {% else %}
-          <p class="no-results">Nenhuma midia encontrada ainda.</p>
-          {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="no-results">Nenhuma mídia encontrada ainda.</p>
+      {% endif %}
     </div>
 
     <script>
@@ -121,10 +117,15 @@
           genero: genero,
           id: id
         };
+
+        // Redirect the user to a new page (assuming you want to show more details)
+
+        // You could also save the media to your API
         salvarMidia(midiaSelecionada);
       }
 
       function salvarMidia(midia) {
+        console.log(midia);
         fetch("salvar_midia", {
           method: "POST",
           headers: {
@@ -132,6 +133,7 @@
             "X-CSRFToken": "{{ csrf_token }}",
           },
           body: JSON.stringify(midia),
+        
         })
         .then((response) => {
           if (response.status === 200) {

@@ -34,18 +34,19 @@ def login(request):
         senha = dados.get("senha")
 
         try:
-            usuario = User.objects.get(email=email)
+            usuario = Usuario.objects.get(email=email)
         except Exception as erro:
+            print(erro)
             usuario = None
             messages.add_message(request, constants.ERROR, "Email inválido!")
-            return redirect("/")
+            return redirect("/login")
 
         usuario_autenticado = auth.authenticate(
             request, username=usuario.username, password=senha
         )
         if usuario_autenticado:
             auth.login(request, usuario_autenticado)
-            return redirect("/agenda")
+            return redirect("/buscar_filme")
         else:
             messages.add_message(request, constants.ERROR, "Senha inválida!")
             return redirect("/")
@@ -63,8 +64,8 @@ def criar_conta(request):
         senha = dados.get("senha")
 
         if (
-            User.objects.filter(email=email).exists()
-            or User.objects.filter(username=email).exists()
+            Usuario.objects.filter(email=email).exists()
+            or Usuario.objects.filter(username=email).exists()
         ):
             messages.add_message(
                 request, constants.WARNING, "Já existe um usuário com esse email"
@@ -72,10 +73,10 @@ def criar_conta(request):
 
         else:
             try:
-                User.objects.create_user(
+                Usuario.objects.create_user(
                     username=email,
                     first_name=nome,
-                    perfil=PERFIS.USUARIO,
+                    perfil="USUARIO",
                     email=email,
                     password=senha,
                 )
@@ -88,9 +89,8 @@ def criar_conta(request):
                 messages.add_message(
                     request, constants.ERROR, "Não foi possível criar conta"
                 )
-                # return redirect("/")
 
-        return redirect("/")
+        return redirect("/login")
 
 
 def buscar_filme(request):
