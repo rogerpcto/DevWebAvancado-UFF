@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.messages import constants
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from .models import PERFIS, Midia, Review, Usuario, Amigo
+from .models import PERFIS, Midia, Review, Usuario, Amigo, Filme, Midia
 import requests
 from django.http import JsonResponse
 from django.db.models import Q
@@ -104,7 +104,7 @@ def buscar_filme(request):
         if dados.get("api_externa").lower() == "true":
             url = f"{URL}/Movie/Search"
             params_to_search = ["content"]
-            query_string = {"Page": "1", "Language": "en-US", "Adult": "true"}
+            query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
             for param in params_to_search:
                 if dados.get(param):
                     query_string[param] = dados.get(param)
@@ -119,7 +119,7 @@ def buscar_filme(request):
                 "genres",
                 "id",
             ]
-            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
+            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id_midia"]
             for midia in json_data:
                 if midia["originalLanguage"] == "en":
                     filtered_midia = {
@@ -166,7 +166,7 @@ def buscar_serie(request):
                 "firstAirDate",
                 "voteAverage",
                 "genres",
-                "id",
+                "id"
             ]
             propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
             for midia in json_data:
@@ -212,7 +212,7 @@ def buscar_midia(request):
 def salvar_midia(request):
     if request.method == 'POST':
         try:
-            midia_data = json.loads(request.body)
+            midia_data = json.loads(request.body).get("midia")
             titulo = midia_data.get("titulo")
             data_lancamento = midia_data.get("data_lancamento")
             nota = midia_data.get("nota")
@@ -227,10 +227,24 @@ def salvar_midia(request):
             )
             midia.save()
 
+            if json.loads(request.body).get("tipo_midia") == "filme":
+                midia.duracao = get_filme_duracao(midia.id_midia)
+                if midia.duracao:
+                    salvar_filme(midia)
+
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     return JsonResponse({'message': 'Data received', 'data': midia.id_midia}, status=200)
+
+def get_filme_duracao(id_midia):
+        url = f"{URL}/Movie/Detail"
+        query_string = {"Items": id_midia, "Language": "pt-BR"}
+        response = requests.get(url, headers=HEADERS, params=query_string)
+        json_data = response.json()
+        duracao = int(json_data[0]["runtime"])
+        return duracao
+
 
 def listar_reviews(request):
     if request.method == "GET":
@@ -244,7 +258,18 @@ def listar_reviews(request):
             )
         user_reviews = list(user_reviews.values())
         return JsonResponse(user_reviews, safe=False)
+    
 
+def salvar_filme(midia):
+        if midia:
+            try:
+                Filme.objects.create(
+                    midia = midia,
+                    duracao = midia.duracao
+                )
+            except Exception as erro:
+                print(erro)
+            
 
 def buscar_usuarios(request):
     if request.method == "GET":

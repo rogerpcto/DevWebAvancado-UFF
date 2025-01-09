@@ -118,22 +118,22 @@
           id: id
         };
 
-        // Redirect the user to a new page (assuming you want to show more details)
-
-        // You could also save the media to your API
         salvarMidia(midiaSelecionada);
       }
 
       function salvarMidia(midia) {
-        console.log(midia);
+        const tipo_midia = document.getElementById("tipo").value
         fetch("salvar_midia", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": "{{ csrf_token }}",
           },
-          body: JSON.stringify(midia),
-        
+        body: JSON.stringify({
+          midia: midia,
+          tipo_midia: tipo_midia
+        }),
+
         })
         .then((response) => {
           if (response.status === 200) {
