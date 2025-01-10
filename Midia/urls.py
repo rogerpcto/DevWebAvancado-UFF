@@ -11,5 +11,5 @@ urlpatterns = [
     path("salvar_midia", views.salvar_midia, name="salvar_midia"),
     path("login", views.login, name="login"),
     path("criar_conta", views.criar_conta, name="criar_conta"),
-
+    path("criar_filme", views.criar_filme, name="criar_filme")
 ]

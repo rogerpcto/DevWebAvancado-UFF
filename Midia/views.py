@@ -17,8 +17,8 @@ from .models import (
 )
 import requests
 from django.http import JsonResponse
-from django.db.models import Q
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -241,7 +241,11 @@ def salvar_midia(request):
             if json.loads(request.body).get("tipo_midia") == "filme":
                 midia.duracao = get_filme_duracao(midia.id_midia)
                 if midia.duracao:
-                    salvar_filme(midia)
+                    # salvar_filme(midia)
+                    url = "http://localhost:8000/criar_filme"  # Ajuste o domínio conforme necessário
+                    params = {"id_midia": midia.id_midia}  # Parâmetro de consulta
+                    response = requests.post(url, params=params)
+                    criar_filme(request)
 
             elif json.loads(request.body).get("tipo_midia") == "serie":
                 get_all_series_episodes(midia)
@@ -349,6 +353,28 @@ def salvar_filme(midia):
             Filme.objects.create(midia=midia, duracao=midia.duracao)
         except Exception as erro:
             print(erro)
+
+
+@csrf_exempt
+def criar_filme(request):
+    midia_id = request.GET.get("id_midia", "")
+    # midia_id = json.loads(request.body).get("id_midia")
+    try:
+        midia = Midia.objects.filter(id_midia= int(midia_id)).first()
+
+        if midia:
+            duracao = get_filme_duracao(midia.id_midia)
+            filme = Filme.objects.create(midia=midia, duracao=duracao)
+            
+            return JsonResponse(list(filme.values()), safe=False)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Mídia não encontrada!'}, status=404)
+
+    except Exception as erro:
+        return JsonResponse({'status': 'error', 'message': str(erro)}, status=401)
+    
+    
+    
 
 
 def buscar_usuarios(request):
