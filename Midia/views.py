@@ -4,7 +4,17 @@ from django.contrib import messages
 from django.contrib.messages import constants
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from .models import PERFIS, Midia, Review, Usuario, Amigo, Filme, Midia
+from .models import (
+    PERFIS,
+    Midia,
+    Review,
+    Usuario,
+    Amigo,
+    Filme,
+    Midia,
+    Temporada,
+    Episodio,
+)
 import requests
 from django.http import JsonResponse
 from django.db.models import Q
@@ -166,9 +176,9 @@ def buscar_serie(request):
                 "firstAirDate",
                 "voteAverage",
                 "genres",
-                "id"
+                "id",
             ]
-            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id"]
+            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id_midia"]
             for midia in json_data:
                 if midia["originalLanguage"] == "en":
                     filtered_midia = {
@@ -191,7 +201,7 @@ def buscar_serie(request):
                 )
 
             midias = response.json()
-        return render(request, "buscar_filme.html", {"midias": midias, "tipo":"serie"})
+        return render(request, "buscar_filme.html", {"midias": midias, "tipo": "serie"})
 
 
 def buscar_midia(request):
@@ -208,9 +218,10 @@ def buscar_midia(request):
             )
         midias = list(midias.values())
         return JsonResponse(midias, safe=False)
-    
+
+
 def salvar_midia(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             midia_data = json.loads(request.body).get("midia")
             titulo = midia_data.get("titulo")
@@ -223,7 +234,7 @@ def salvar_midia(request):
                 data_lancamento=data_lancamento,
                 nota=nota,
                 genero=genero,
-                id_midia=id
+                id_midia=id,
             )
             midia.save()
 
@@ -232,18 +243,90 @@ def salvar_midia(request):
                 if midia.duracao:
                     salvar_filme(midia)
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            elif json.loads(request.body).get("tipo_midia") == "serie":
+                get_all_series_episodes(midia)
 
-    return JsonResponse({'message': 'Data received', 'data': midia.id_midia}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    return JsonResponse(
+        {"message": "Data received", "data": midia.id_midia}, status=200
+    )
+
+
+def get_all_series_episodes(midia):
+    url = f"{URL}/Serie/Detail"
+    query_string = {"Items": midia.id_midia, "Language": "pt-BR"}
+    response = requests.get(url, headers=HEADERS, params=query_string)
+    numero_de_temporadas = int(response.json()[0]["numberOfSeasons"])
+    if numero_de_temporadas:
+        url = f"{URL}/Serie/Episodes"
+        for temporada in range(1, (numero_de_temporadas + 1)):
+            query_string = {
+                "ItemId": midia.id_midia,
+                "Language": "pt-BR",
+                "SeasonNumber": temporada,
+            }
+            response = requests.get(url, headers=HEADERS, params=query_string)
+            json_data = response.json()
+            if any(value is None for item in json_data for value in item.values()):
+                continue
+
+            try:
+                serie_temporada = Temporada.objects.create(
+                    serie=midia, numero_temporada=temporada
+                )
+            except Exception as erro:
+                print(erro)
+
+            properties_to_filter = [
+                "name",
+                "airDate",
+                "voteAverage",
+                "id",
+                "episodeNumber",
+                "runtime",
+            ]
+            propriedades = [
+                "titulo",
+                "data_lancamento",
+                "nota",
+                "id_midia",
+                "numero_episodio",
+                "duracao",
+            ]
+            for episode in json_data:
+                filtered_midia = {
+                    propriedades[contador]: episode[key]
+                    for contador, key in enumerate(properties_to_filter)
+                    if key in episode
+                }
+                try:
+                    episodio = Midia.objects.create(
+                        id_midia=filtered_midia["id_midia"],
+                        titulo=filtered_midia["titulo"],
+                        data_lancamento=filtered_midia["data_lancamento"],
+                        nota=filtered_midia["nota"],
+                    )
+
+                    Episodio.objects.create(
+                        episodio=episodio,
+                        serie_temporada=serie_temporada,
+                        numero_episodio=filtered_midia["numero_episodio"],
+                        duracao=filtered_midia["duracao"],
+                    )
+                except Exception as erro:
+                    print(erro)
+    return
+
 
 def get_filme_duracao(id_midia):
-        url = f"{URL}/Movie/Detail"
-        query_string = {"Items": id_midia, "Language": "pt-BR"}
-        response = requests.get(url, headers=HEADERS, params=query_string)
-        json_data = response.json()
-        duracao = int(json_data[0]["runtime"])
-        return duracao
+    url = f"{URL}/Movie/Detail"
+    query_string = {"Items": id_midia, "Language": "pt-BR"}
+    response = requests.get(url, headers=HEADERS, params=query_string)
+    json_data = response.json()
+    duracao = int(json_data[0]["runtime"])
+    return duracao
 
 
 def listar_reviews(request):
@@ -258,18 +341,15 @@ def listar_reviews(request):
             )
         user_reviews = list(user_reviews.values())
         return JsonResponse(user_reviews, safe=False)
-    
+
 
 def salvar_filme(midia):
-        if midia:
-            try:
-                Filme.objects.create(
-                    midia = midia,
-                    duracao = midia.duracao
-                )
-            except Exception as erro:
-                print(erro)
-            
+    if midia:
+        try:
+            Filme.objects.create(midia=midia, duracao=midia.duracao)
+        except Exception as erro:
+            print(erro)
+
 
 def buscar_usuarios(request):
     if request.method == "GET":

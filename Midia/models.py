@@ -7,10 +7,8 @@ from django.forms import ValidationError
 
 # Create your models here.
 
-PERFIS = (
-    ("ADMINISTRADOR", "Administrador"),
-    ("USUARIO", "Usuário")
-)
+PERFIS = (("ADMINISTRADOR", "Administrador"), ("USUARIO", "Usuário"))
+
 
 # POR PADRÃO, O DJANGO JÁ POSSUI UMA CLASSE "USER", que contém campos que todo usuario tem, como username, senha, email
 class Usuario(AbstractUser):
@@ -37,7 +35,7 @@ class Midia(models.Model):
     titulo = models.CharField(max_length=255, null=False)
     nota = models.FloatField(null=False)
     data_lancamento = models.DateField(null=False)
-    genero = models.CharField(max_length=100, null=False)
+    genero = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.titulo
@@ -77,33 +75,17 @@ class Temporada(models.Model):
 
 class Episodio(models.Model):
     episodio = models.OneToOneField(Midia, on_delete=models.DO_NOTHING, null=False)
-    serie = models.ForeignKey(
+    serie_temporada = models.ForeignKey(
         Temporada,
         on_delete=models.DO_NOTHING,
         null=False,
         related_name="episodios_serie",
     )
-    numero_temporada = models.ForeignKey(
-        Temporada,
-        on_delete=models.DO_NOTHING,
-        null=False,
-        related_name="episodios_temporada",
-    )
     numero_episodio = models.IntegerField(null=False)
     duracao = models.IntegerField(null=False)
 
     class Meta:
-        unique_together = (("serie", "numero_temporada", "numero_episodio"),)
-
-    def clean(self):
-        # Verifica se a serie possui de fato a temporada
-        if not Temporada.objects.filter(
-            serie=self.serie.serie,
-            numero_temporada=self.numero_temporada.numero_temporada,
-        ).exists():
-            raise ValidationError(
-                f"A temporada {self.numero_temporada.numero} NÃO existe na série {self.serie.serie.titulo}."
-            )
+        unique_together = (("serie_temporada", "numero_episodio"),)
 
     def __str__(self):
         return f"{self.serie.serie.titulo}. Temporada-{self.numero_temporada}. Episodio{self.numero_episodio}"
