@@ -51,14 +51,14 @@ button {
   font-size: 1rem;
   border: none;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: #333;
   color: white;
   border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #555;
 }
 
 .form-actions {

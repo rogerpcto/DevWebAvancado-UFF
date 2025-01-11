@@ -1,0 +1,273 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+header {
+  background-color: #333;
+  padding: 5px 0; /* Reduced padding */
+  color: white;
+  position: relative;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between; /* Push items to both sides */
+  align-items: center;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  margin: 0 10px; /* Reduced margin */
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px; /* Reduced font size */
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+nav .nav-list {
+  list-style: none;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+nav .nav-list li {
+  margin-right: 20px; /* Reduced margin between nav items */
+}
+
+nav .nav-list li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem; /* Reduced font size */
+  transition: color 0.3s ease;
+}
+
+nav .nav-list li a:hover {
+  color: #f39c12;
+}
+
+nav .greeting {
+  margin-left: auto; /* This makes sure the greeting goes to the right */
+  color: #f39c12;
+  font-weight: bold;
+  font-size: 1rem; /* Reduced font size */
+}
+
+nav .greeting span {
+  font-size: 1rem; /* Reduced font size */
+}
+
+/* Main Content */
+main {
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.reviews-container {
+  display: flex;
+  flex-direction: row; /* Change from column to row */
+  flex-wrap: wrap; /* Allow wrapping of review cards on smaller screens */
+  gap: 20px; /* Space between the cards */
+  justify-content: center; /* Center the cards horizontally */
+  margin-top: 20px;
+}
+
+.review-card {
+  width: 320px; /* Increased width of the review cards */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px; /* Add space below the card */
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.review-card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.review-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.review-feedback {
+  margin-top: 15px;
+}
+
+.like-btn,
+.dislike-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  margin-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.like-btn:hover {
+  background-color: #2980b9;
+}
+
+.dislike-btn {
+  background-color: #e74c3c;
+}
+
+.dislike-btn:hover {
+  background-color: #c0392b;
+}
+
+.no-reviews {
+  font-size: 1.2rem;
+  color: #999;
+  text-align: center;
+  margin-top: 50px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Footer */
+footer {
+  background-color: #333;
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+
+footer p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Page Loader */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  .review-card {
+    padding: 15px;
+  }
+
+  .reviews-container {
+    flex-direction: column; /* Stack the review cards vertically on smaller screens */
+  }
+
+  .review-card {
+    width: 100%; /* Make the cards full-width on smaller screens */
+    max-width: 600px; /* Set a max-width to keep the cards from getting too large */
+  }
+}
+
+/* Remove default link styles */
+.username-link {
+  text-decoration: none;
+  color: inherit; /* Inherit the color of the surrounding text */
+}
+
+.username-link:hover {
+  text-decoration: underline; /* Optional: you can add a hover effect */
+}
+
+.review-card img {
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Back arrow styles */
+.back-arrow {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  color: #333;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.back-arrow i {
+  color: #333;
+  display: inline-block;
+}
+
+.back-arrow:hover {
+  color: #3498db; /* Change to any color you like */
+}

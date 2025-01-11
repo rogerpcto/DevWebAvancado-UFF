@@ -5,10 +5,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{% static '/css/buscar_filme.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Busca de Mídia</title>
   </head>
   <body>
     <div class="container">
+      <!-- Back arrow to home page -->
+      <a href="/" class="back-arrow fas fa-arrow-left"></a>
+      
       <h1>Busca de Mídia</h1>
       <form method="post" id="form-midia">
         {% csrf_token %}
@@ -49,6 +53,9 @@
             </script>
             {% endif %}
         </div>
+        {% if message%}
+        <p class="message">{{ message }}</p>
+        {% endif %}
 
       </form>
 
@@ -87,7 +94,7 @@
         </table>
       </div>
       {% else %}
-      <p class="no-results">Nenhuma mídia encontrada ainda.</p>
+      <p class="no-results">Nenhuma mídia encontrada ainda. Pesquise ou verifique se a busca está correta.</p>
       {% endif %}
     </div>
 
@@ -136,17 +143,15 @@
         }),
 
         })
-        .then((response) => {
-          if (response.status === 200) {
-            return response.json();
+        .then(response => {
+          console.log(response);
+          if (response.status === 200 || response.status === 403) {
+            window.location.href = "{% url 'Midia:criar_review' %}";
           } else {
             throw new Error('Erro ao salvar a mídia.');
           }
         })
-        .then((data) => {
-          alert("Mídia salva com sucesso!");
-        })
-        .catch((error) => {
+        .catch(error => {
           alert(error.message);
         });
       }

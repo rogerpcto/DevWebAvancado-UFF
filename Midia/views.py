@@ -54,7 +54,7 @@ def login(request):
         )
         if usuario_autenticado:
             auth.login(request, usuario_autenticado)
-            return redirect("/buscar_filme")
+            return redirect("/")
         else:
             messages.add_message(request, constants.ERROR, "Senha inválida!")
             return redirect("/")
@@ -104,6 +104,15 @@ def criar_conta(request):
 
         return redirect("/login")
 
+@login_required(login_url="/login")	
+def home(request):
+    reviews = Review.objects.filter(usuario=request.user)
+    return render(request, "home.html", {"reviews": reviews})
+
+@login_required(login_url="/login")
+def profile(request):
+    user = Usuario.objects.get(username=request.user)
+    return render(request, "profile.html", {"user": user})
 
 @login_required(login_url="/login")
 def buscar_filme(request):
@@ -123,6 +132,12 @@ def buscar_filme(request):
                     query_string[param] = dados.get(param)
 
             response = requests.get(url, headers=HEADERS, params=query_string)
+            if not response.content:
+                      return render(
+                    request,
+                    "buscar_filme.html",
+                    {"midia": {}},
+                )
             json_data = response.json()
             midias = []
             properties_to_filter = [
@@ -180,6 +195,12 @@ def buscar_serie(request):
                     query_string[param] = dados.get(param)
 
             response = requests.get(url, headers=HEADERS, params=query_string)
+            if not response.content:
+                return render(
+                    request,
+                    "buscar_filme.html",
+                    {"midia": {}},
+                )
             json_data = response.json()
             midias = []
             properties_to_filter = [
@@ -273,6 +294,9 @@ def salvar_midia(request):
                     response = requests.post(url, params=params)
 
         except Exception as erro:
+            if "UNIQUE" in str(erro):
+                return JsonResponse(
+                    {"error": "Mídia já cadastrada"}, status=403)
             return JsonResponse({"error": str(erro)}, status=400)
 
     return JsonResponse(
@@ -377,6 +401,34 @@ def criar_episodios_temporada(request):
             {"message": "Todos os Episódios da série foram adicionados com sucesso!"},
             status=200,
         )
+
+
+@login_required(login_url="/login")
+def criar_review(request):
+    if request.method == "GET":
+        midias = Midia.objects.all()
+        return render(request, "criar_review.html", {"midias": midias})
+
+    elif request.method == "POST":
+        dados = request.POST
+        midia_id = dados.get("midia")
+        nota = dados.get("nota")
+        comentario = dados.get("comentario")
+
+        try:
+            midia = Midia.objects.get(id_midia=midia_id)
+            Review.objects.create(
+                usuario=request.user,
+                midia=midia,
+                nota=nota,
+                comentario=comentario,
+            )
+            messages.add_message(request, constants.SUCCESS, "Review adicionada com sucesso!")
+        except Exception as erro:
+            print(erro)
+            messages.add_message(request, constants.ERROR, "Não foi possível adicionar a review")
+
+        return redirect("Midia:home")
 
 
 def listar_reviews(request):

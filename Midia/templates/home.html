@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static '/css/home.css' %}" />
+    <title>Home</title>
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="container">
+        <nav>
+          <ul class="nav-list">
+            <li>
+              <a href="{% url 'Midia:buscar_filme' %}">Adicionar Review</a>
+            </li>
+            <li><a href="#">Amigos</a></li>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'Midia:logout' %}">Logout</a></li>
+            {% else %}
+            <li><a href="{% url 'Midia:login' %}">Login</a></li>
+            {% endif %}
+          </ul>
+
+          <div class="greeting">
+            {% if user.is_authenticated %}
+            <span
+              >Olá,
+              <a href="{% url 'Midia:profile' %}" class="username-link"
+                >{{ user.username }}</a
+              >!</span
+            >
+            {% endif %}
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <div class="container">
+        <h1>Minhas Reviews</h1>
+
+        {% if reviews %}
+        <div class="reviews-container">
+          {% for review in reviews %}
+          <div class="review-card">
+            <h2>{{ review.midia.titulo }}</h2>
+            <img src={{ review.midia.poster }} height="150px" width="150px"></img>
+            <p><strong>Nota:</strong> {{ review.nota }}</p>
+            <p>{{ review.comentario }}</p>
+
+            <!-- Like/Dislike Button -->
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-reviews">Você ainda não possui reviews.</p>
+        {% endif %}
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 Desenvolvimento web avançado</p>
+      </div>
+    </footer>
+
+    <!-- Page Load Animation (optional) -->
+    <div id="page-loader" class="page-loader">
+      <div class="loader"></div>
+    </div>
+
+    <!-- Scripts (optional JS for dynamic features) -->
+    <script>
+      // Hide the page loader after content is loaded
+      window.addEventListener("load", function () {
+        document.getElementById("page-loader").style.display = "none";
+      });
+    </script>
+  </body>
+</html>
