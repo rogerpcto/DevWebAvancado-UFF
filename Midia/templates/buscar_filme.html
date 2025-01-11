@@ -76,7 +76,7 @@
                 <button
                   type="button"
                   class="select-btn"
-                  onclick="selectMedia('{{ midia.titulo|escapejs }}', '{{ midia.data_lancamento|escapejs }}', '{{ midia.nota|escapejs }}', '{{ midia.genero|escapejs }}', '{{ midia.id_midia|escapejs }}')"
+                  onclick="selectMedia('{{ midia.titulo|escapejs }}', '{{ midia.data_lancamento|escapejs }}', '{{ midia.nota|escapejs }}', '{{ midia.genero|escapejs }}', '{{ midia.id_midia|escapejs }}', '{{midia.imagem|escapejs }}')"
                 >
                   Selecionar
                 </button>
@@ -109,13 +109,14 @@
         document.getElementById(formId).submit();
       }
 
-      function selectMedia(titulo, dataLancamento , nota, genero, id) {
+      function selectMedia(titulo, dataLancamento , nota, genero, id, poster) {
         const midiaSelecionada = {
           titulo: titulo,
           data_lancamento: dataLancamento,
           nota: nota,
           genero: genero,
-          id: id
+          id: id,
+          poster: poster
         };
 
         salvarMidia(midiaSelecionada);

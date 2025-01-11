@@ -36,6 +36,7 @@ class Midia(models.Model):
     nota = models.FloatField(null=True)
     data_lancamento = models.DateField(null=True)
     genero = models.CharField(max_length=100, null=True)
+    poster = models.URLField(max_length=500, null=True)
 
     def __str__(self):
         return self.titulo

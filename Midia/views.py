@@ -131,8 +131,16 @@ def buscar_filme(request):
                 "voteAverage",
                 "genres",
                 "id",
+                "image",
             ]
-            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id_midia"]
+            propriedades = [
+                "titulo",
+                "data_lancamento",
+                "nota",
+                "genero",
+                "id_midia",
+                "imagem",
+            ]
             for midia in json_data:
                 if midia["originalLanguage"] == "en":
                     filtered_midia = {
@@ -180,8 +188,16 @@ def buscar_serie(request):
                 "voteAverage",
                 "genres",
                 "id",
+                "image",
             ]
-            propriedades = ["titulo", "data_lancamento", "nota", "genero", "id_midia"]
+            propriedades = [
+                "titulo",
+                "data_lancamento",
+                "nota",
+                "genero",
+                "id_midia",
+                "imagem",
+            ]
             for midia in json_data:
                 if midia["originalLanguage"] == "en":
                     filtered_midia = {
@@ -232,14 +248,15 @@ def salvar_midia(request):
             nota = midia_data.get("nota")
             genero = midia_data.get("genero")
             id = midia_data.get("id")
-            midia = Midia(
+            poster = midia_data.get("poster")
+            midia = Midia.objects.create(
                 titulo=titulo,
                 data_lancamento=data_lancamento,
                 nota=nota,
                 genero=genero,
                 id_midia=id,
+                poster=poster,
             )
-            midia.save()
 
             if json.loads(request.body).get("tipo_midia") == "filme":
                 url = "http://localhost:8000/criar_filme"
@@ -255,8 +272,8 @@ def salvar_midia(request):
                     params = {"id_midia": midia.id_midia}
                     response = requests.post(url, params=params)
 
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as erro:
+            return JsonResponse({"error": str(erro)}, status=400)
 
     return JsonResponse(
         {"message": "Data received", "data": midia.id_midia}, status=200
@@ -311,9 +328,6 @@ def criar_episodios_temporada(request):
                 }
                 response = requests.get(url, headers=HEADERS, params=query_string)
                 json_data = response.json()
-                # if any(value is None for item in json_data for value in item.values()):
-                #     Temporada.delete(temporada)
-                #     continue
                 properties_to_filter = [
                     "name",
                     "airDate",
@@ -321,6 +335,7 @@ def criar_episodios_temporada(request):
                     "id",
                     "episodeNumber",
                     "runtime",
+                    "image",
                 ]
                 propriedades = [
                     "titulo",
@@ -329,6 +344,7 @@ def criar_episodios_temporada(request):
                     "id_midia",
                     "numero_episodio",
                     "duracao",
+                    "imagem",
                 ]
                 for episode in json_data:
                     filtered_midia = {
@@ -344,6 +360,7 @@ def criar_episodios_temporada(request):
                             titulo=filtered_midia["titulo"],
                             data_lancamento=filtered_midia["data_lancamento"],
                             nota=filtered_midia["nota"],
+                            poster=filtered_midia["imagem"],
                         )
 
                         Episodio.objects.create(
