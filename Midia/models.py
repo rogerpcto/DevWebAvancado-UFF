@@ -32,9 +32,9 @@ class Amigo(models.Model):
 
 class Midia(models.Model):
     id_midia = models.IntegerField(primary_key=True)
-    titulo = models.CharField(max_length=255, null=False)
-    nota = models.FloatField(null=False)
-    data_lancamento = models.DateField(null=False)
+    titulo = models.CharField(max_length=255, null=True)
+    nota = models.FloatField(null=True)
+    data_lancamento = models.DateField(null=True)
     genero = models.CharField(max_length=100, null=True)
 
     def __str__(self):
@@ -55,8 +55,10 @@ class Review(models.Model):
 
 
 class Filme(models.Model):
-    midia = models.OneToOneField(Midia, on_delete=models.DO_NOTHING, null=False)
-    duracao = models.IntegerField(null=False)
+    midia = models.OneToOneField(
+        Midia, on_delete=models.DO_NOTHING, null=False, unique=True
+    )
+    duracao = models.IntegerField()
 
     def __str__(self):
         return self.midia.titulo
@@ -82,7 +84,7 @@ class Episodio(models.Model):
         related_name="episodios_serie",
     )
     numero_episodio = models.IntegerField(null=False)
-    duracao = models.IntegerField(null=False)
+    duracao = models.IntegerField(null=True)
 
     class Meta:
         unique_together = (("serie_temporada", "numero_episodio"),)
