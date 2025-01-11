@@ -19,14 +19,12 @@ import requests
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
-
-# Create your views here.
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-# API_KEY = os.getenv('API_KEY')
 URL = "https://tvshow.p.rapidapi.com"
 API_HOST = "tvshow.p.rapidapi.com"
 
@@ -40,11 +38,11 @@ def login(request):
 
     elif request.method == "POST":
         dados = request.POST
-        email = dados.get("username")
+        username = dados.get("username")
         senha = dados.get("senha")
 
         try:
-            usuario = Usuario.objects.get(email=email)
+            usuario = Usuario.objects.get(username=username)
         except Exception as erro:
             print(erro)
             usuario = None
@@ -62,6 +60,11 @@ def login(request):
             return redirect("/")
 
 
+def logout(request):
+    auth.logout(request)
+    return redirect("/login")
+
+
 def criar_conta(request):
     if request.method == "GET":
         return render(request, "criar_conta.html")
@@ -69,7 +72,6 @@ def criar_conta(request):
     else:
         dados = request.POST
         nome = dados.get("primeiro-nome").title()
-        # last_name = dados.get("ultimo-nome").title()
         email = dados.get("email").strip()
         senha = dados.get("senha")
 
@@ -103,6 +105,7 @@ def criar_conta(request):
         return redirect("/login")
 
 
+@login_required(login_url="/login")
 def buscar_filme(request):
 
     if request.method == "GET":
@@ -139,8 +142,8 @@ def buscar_filme(request):
                     }
                     midias.append(filtered_midia)
         else:
-            url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
-            params = {"nome": dados.get("content")}  # Parâmetro de consulta
+            url = "http://localhost:8000/buscar_midia"
+            params = {"nome": dados.get("content")}
             response = requests.get(url, params=params)
             if response.status_code == 404:
                 return render(
@@ -153,6 +156,7 @@ def buscar_filme(request):
         return render(request, "buscar_filme.html", {"midias": midias, "tipo": "filme"})
 
 
+@login_required(login_url="/login")
 def buscar_serie(request):
     if request.method == "GET":
         return render(request, "buscar_filme.html")
@@ -161,7 +165,6 @@ def buscar_serie(request):
         dados = request.POST
         url = f"{URL}/Serie/Search"
         params_to_search = ["content"]
-        # TO DO: if the midia is not in the first page, then we can add a feature to load more midias
         if dados.get("api_externa").lower() == "true":
             query_string = {"Page": "1", "Language": "pt-BR", "Adult": "true"}
             for param in params_to_search:
@@ -190,8 +193,8 @@ def buscar_serie(request):
                     midias.append(filtered_midia)
 
         else:
-            url = "http://localhost:8000/buscar_midia"  # Ajuste o domínio conforme necessário
-            params = {"nome": dados.get("content")}  # Parâmetro de consulta
+            url = "http://localhost:8000/buscar_midia"
+            params = {"nome": dados.get("content")}
             response = requests.get(url, params=params)
             if response.status_code == 404:
                 return render(
@@ -214,7 +217,7 @@ def buscar_midia(request):
         if not midias:
             return JsonResponse(
                 {"message": "Nenhuma Mídia encontrada"},
-                status=404,  # Código HTTP para "Não Encontrado"
+                status=404,
             )
         midias = list(midias.values())
         return JsonResponse(midias, safe=False)
@@ -239,16 +242,18 @@ def salvar_midia(request):
             midia.save()
 
             if json.loads(request.body).get("tipo_midia") == "filme":
-                midia.duracao = get_filme_duracao(midia.id_midia)
-                if midia.duracao:
-                    # salvar_filme(midia)
-                    url = "http://localhost:8000/criar_filme"  # Ajuste o domínio conforme necessário
-                    params = {"id_midia": midia.id_midia}  # Parâmetro de consulta
-                    response = requests.post(url, params=params)
-                    criar_filme(request)
+                url = "http://localhost:8000/criar_filme"
+                params = {"id_midia": midia.id_midia}
+                response = requests.post(url, params=params)
 
             elif json.loads(request.body).get("tipo_midia") == "serie":
-                get_all_series_episodes(midia)
+                url = "http://localhost:8000/criar_serie_temporada"
+                params = {"id_midia": midia.id_midia}
+                response = requests.post(url, params=params)
+                if response.status_code == 200:
+                    url = "http://localhost:8000/criar_episodios_temporada"
+                    params = {"id_midia": midia.id_midia}
+                    response = requests.post(url, params=params)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -258,79 +263,103 @@ def salvar_midia(request):
     )
 
 
-def get_all_series_episodes(midia):
-    url = f"{URL}/Serie/Detail"
-    query_string = {"Items": midia.id_midia, "Language": "pt-BR"}
-    response = requests.get(url, headers=HEADERS, params=query_string)
-    numero_de_temporadas = int(response.json()[0]["numberOfSeasons"])
-    if numero_de_temporadas:
-        url = f"{URL}/Serie/Episodes"
-        for temporada in range(1, (numero_de_temporadas + 1)):
-            query_string = {
-                "ItemId": midia.id_midia,
-                "Language": "pt-BR",
-                "SeasonNumber": temporada,
-            }
-            response = requests.get(url, headers=HEADERS, params=query_string)
-            json_data = response.json()
-            if any(value is None for item in json_data for value in item.values()):
-                continue
-
-            try:
-                serie_temporada = Temporada.objects.create(
-                    serie=midia, numero_temporada=temporada
+@csrf_exempt
+def criar_serie_temporada(request):
+    if request.method == "POST":
+        midia_id = request.GET.get("id_midia", "")
+        try:
+            midia = Midia.objects.filter(id_midia=int(midia_id)).first()
+            if midia:
+                url = f"{URL}/Serie/Detail"
+                query_string = {"Items": midia.id_midia, "Language": "pt-BR"}
+                response = requests.get(url, headers=HEADERS, params=query_string)
+                numero_de_temporadas = int(response.json()[0]["numberOfSeasons"])
+                for temporada in range(1, (numero_de_temporadas + 1)):
+                    Temporada.objects.create(serie=midia, numero_temporada=temporada)
+                return JsonResponse(
+                    {"message": "As temporadas da série foram criadas com sucesso!"},
+                    status=200,
                 )
-            except Exception as erro:
-                print(erro)
+        except Exception as erro:
+            return JsonResponse({"status": "error", "message": str(erro)}, status=400)
 
-            properties_to_filter = [
-                "name",
-                "airDate",
-                "voteAverage",
-                "id",
-                "episodeNumber",
-                "runtime",
-            ]
-            propriedades = [
-                "titulo",
-                "data_lancamento",
-                "nota",
-                "id_midia",
-                "numero_episodio",
-                "duracao",
-            ]
-            for episode in json_data:
-                filtered_midia = {
-                    propriedades[contador]: episode[key]
-                    for contador, key in enumerate(properties_to_filter)
-                    if key in episode
+
+@csrf_exempt
+def criar_episodios_temporada(request):
+    if request.method == "POST":
+        midia_id = request.GET.get("id_midia", "")
+        midia = Midia.objects.filter(id_midia=int(midia_id)).first()
+        if midia:
+            serie_temporadas = Temporada.objects.filter(serie=midia).order_by(
+                "numero_temporada"
+            )
+            quantidade_temporadas = serie_temporadas.count()
+            if quantidade_temporadas == 0:
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": f"A midia com o id {midia_id} não corresponde a uma série. Ou as temporadas dessa mídia ainda não foram criadas.",
+                    },
+                    status=400,
+                )
+            url = f"{URL}/Serie/Episodes"
+            for temporada in serie_temporadas:
+                query_string = {
+                    "ItemId": temporada.serie.id_midia,
+                    "Language": "pt-BR",
+                    "SeasonNumber": temporada.numero_temporada,
                 }
-                try:
-                    episodio = Midia.objects.create(
-                        id_midia=filtered_midia["id_midia"],
-                        titulo=filtered_midia["titulo"],
-                        data_lancamento=filtered_midia["data_lancamento"],
-                        nota=filtered_midia["nota"],
-                    )
+                response = requests.get(url, headers=HEADERS, params=query_string)
+                json_data = response.json()
+                # if any(value is None for item in json_data for value in item.values()):
+                #     Temporada.delete(temporada)
+                #     continue
+                properties_to_filter = [
+                    "name",
+                    "airDate",
+                    "voteAverage",
+                    "id",
+                    "episodeNumber",
+                    "runtime",
+                ]
+                propriedades = [
+                    "titulo",
+                    "data_lancamento",
+                    "nota",
+                    "id_midia",
+                    "numero_episodio",
+                    "duracao",
+                ]
+                for episode in json_data:
+                    filtered_midia = {
+                        propriedades[contador]: episode[key]
+                        for contador, key in enumerate(properties_to_filter)
+                        if key in episode
+                    }
+                    if all(value is None for value in filtered_midia.values()):
+                        continue
+                    try:
+                        episodio = Midia.objects.create(
+                            id_midia=filtered_midia["id_midia"],
+                            titulo=filtered_midia["titulo"],
+                            data_lancamento=filtered_midia["data_lancamento"],
+                            nota=filtered_midia["nota"],
+                        )
 
-                    Episodio.objects.create(
-                        episodio=episodio,
-                        serie_temporada=serie_temporada,
-                        numero_episodio=filtered_midia["numero_episodio"],
-                        duracao=filtered_midia["duracao"],
-                    )
-                except Exception as erro:
-                    print(erro)
-    return
-
-
-def get_filme_duracao(id_midia):
-    url = f"{URL}/Movie/Detail"
-    query_string = {"Items": id_midia, "Language": "pt-BR"}
-    response = requests.get(url, headers=HEADERS, params=query_string)
-    json_data = response.json()
-    duracao = int(json_data[0]["runtime"])
-    return duracao
+                        Episodio.objects.create(
+                            episodio=episodio,
+                            serie_temporada=temporada,
+                            numero_episodio=filtered_midia["numero_episodio"],
+                            duracao=filtered_midia["duracao"],
+                        )
+                    except Exception as erro:
+                        return JsonResponse(
+                            {"status": "error", "message": str(erro)}, status=400
+                        )
+        return JsonResponse(
+            {"message": "Todos os Episódios da série foram adicionados com sucesso!"},
+            status=200,
+        )
 
 
 def listar_reviews(request):
@@ -341,40 +370,39 @@ def listar_reviews(request):
         if not user_reviews:
             return JsonResponse(
                 {"message": "O Usuário ainda não possui Reviews de uma mídia"},
-                status=404,  # Código HTTP para "Não Encontrado"
+                status=404,
             )
         user_reviews = list(user_reviews.values())
         return JsonResponse(user_reviews, safe=False)
 
 
-def salvar_filme(midia):
-    if midia:
-        try:
-            Filme.objects.create(midia=midia, duracao=midia.duracao)
-        except Exception as erro:
-            print(erro)
-
-
 @csrf_exempt
 def criar_filme(request):
-    midia_id = request.GET.get("id_midia", "")
-    # midia_id = json.loads(request.body).get("id_midia")
-    try:
-        midia = Midia.objects.filter(id_midia= int(midia_id)).first()
+    if request.method == "POST":
+        midia_id = request.GET.get("id_midia", "")
+        # midia_id = json.loads(request.body).get("id_midia")
+        try:
+            midia = Midia.objects.filter(id_midia=int(midia_id)).first()
+            if midia:
+                url = f"{URL}/Movie/Detail"
+                query_string = {"Items": midia.id_midia, "Language": "pt-BR"}
+                response = requests.get(url, headers=HEADERS, params=query_string)
+                json_data = response.json()
+                duracao = json_data[0]["runtime"]
+                if duracao:
+                    Filme.objects.create(midia=midia, duracao=int(duracao))
+                    return JsonResponse(
+                        {"message": "Filme criado com sucesso!"}, status=200
+                    )
+                else:
+                    return
+            else:
+                return JsonResponse(
+                    {"status": "error", "message": "Mídia não encontrada!"}, status=400
+                )
 
-        if midia:
-            duracao = get_filme_duracao(midia.id_midia)
-            filme = Filme.objects.create(midia=midia, duracao=duracao)
-            
-            return JsonResponse(list(filme.values()), safe=False)
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Mídia não encontrada!'}, status=404)
-
-    except Exception as erro:
-        return JsonResponse({'status': 'error', 'message': str(erro)}, status=401)
-    
-    
-    
+        except Exception as erro:
+            return JsonResponse({"status": "error", "message": str(erro)}, status=400)
 
 
 def buscar_usuarios(request):
@@ -413,7 +441,7 @@ def desfazer_amizade(request):
         except Exception:
             return JsonResponse(
                 {"message": "Não foi encontrada amizade entre os usuários"},
-                status=401,  # Código HTTP para "Não Encontrado"
+                status=401,
             )
         amizade1.delete()
         amizade2.delete()
@@ -427,6 +455,6 @@ def buscar_amigos(request):
         if not amigos:
             return JsonResponse(
                 {"message": "O usuário não possui amigos"},
-                status=401,  # Código HTTP para "Não Encontrado"
+                status=401,
             )
         return JsonResponse(amigos, safe=False)
