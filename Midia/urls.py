@@ -34,4 +34,5 @@ urlpatterns = [
         name="criar_episodios_temporada",
     ),
     path("seguindo", views.seguindo, name="seguindo"),
+    path("buscar_usuarios", views.buscar_usuarios, name="buscar_usuarios"),
 ]
