@@ -1,86 +1,65 @@
 <!-- profile.html -->
-<!DOCTYPE html>
+{% extends 'base.html' %}
 {% load static %}
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{% static '/css/profile.css' %}" />
-    <title>Perfil de {{ user.nome }}</title>
-  </head>
-  <body>
-    <header>
-      <div class="container">
-        <nav>
-          <a href="#" class="back-arrow">
-            <i class="fa fa-arrow-left"></i>
-          </a>
-          <ul class="nav-list">
-            <li><a href="{% url 'Midia:home' %}">Home</a></li>
-            <li><a href="{% url 'Midia:logout' %}">Logout</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
 
-    <main>
-      <div class="container">
-        <h1>Editar Perfil</h1>
-        <form method="post" action="{% url 'Midia:profile' %}">
-          {% csrf_token %}
-          <input
-          type="hidden"
-          name="username"
-          value="{{ request.user.username }}"
-          />
-          <div class="form-group">
-            <label for="name">Nome:</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value="{{ user.first_name }}"
-              class="form-input"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value="{{ user.email }}"
-              class="form-input"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label for="perfil">Username:</label>
-            <p id="username" class="readonly-field">{{ user.username }}</p>
-          </div>
-          <div class="form-group">
-            <label for="perfil">Perfil:</label>
-            <select
-            id="perfil"
-            name="perfil"
-            class="form-input"
-            {% if request.user.perfil != "ADMINISTRADOR" %}disabled{% endif %}
-          >
-            {% for perfil in perfis %}
-              <option value="{{ perfil }}" {% if user.perfil == perfil %}selected{% endif %}>
-                {{ perfil }}
-              </option>
-            {% endfor %}
-          </select>
-          </div>
-          <button type="submit" class="btn-save">Salvar Alterações</button>
-        </form>
-      </div>
-    </main>
+{% block title %}Seu Perfil{% endblock %}
 
-    <footer>
-      <p>&copy; 2025 Desenvolvimento web avançado.</p>
-    </footer>
-  </body>
-</html>
+{% block content %}
+<link>
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<main>
+  <div class="container">
+    <h1>Editar Perfil</h1>
+    <form method="post" action="{% url 'Midia:profile' %}">
+      {% csrf_token %}
+      <input
+        type="hidden"
+        name="username"
+        value="{{ request.user.username }}"
+      />
+      <div class="form-group">
+        <label for="name">Nome:</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="{{ user.first_name }}"
+          class="form-input"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ user.email }}"
+          class="form-input"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="perfil">Username:</label>
+        <p id="username" class="readonly-field">{{ user.username }}</p>
+      </div>
+      <div class="form-group">
+        <label for="perfil">Perfil:</label>
+        <select
+          id="perfil"
+          name="perfil"
+          class="form-input"
+          {% if request.user.perfil != "ADMINISTRADOR" %}disabled{% endif %}
+        >
+          {% for perfil in perfis %}
+            <option value="{{ perfil }}" {% if user.perfil == perfil %}selected{% endif %}>
+              {{ perfil }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-save">Salvar Alterações</button>
+    </form>
+  </div>
+</main>
+{% endblock %}

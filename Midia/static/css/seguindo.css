@@ -67,3 +67,46 @@ ul {
 li {
   margin-bottom: 10px;
 }
+
+/* Table Styling */
+table {
+  width: 70%; /* Set width to a smaller percentage */
+  margin: 20px auto; /* Center the table horizontally */
+  border-collapse: collapse;
+  table-layout: auto; /* Automatically adjust column width to fit content */
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+  white-space: nowrap; /* Prevent content from wrapping to a new line */
+}
+
+th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+td {
+  background-color: #fff;
+}
+
+tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+form button {
+  padding: 8px 16px;
+  background-color: #333;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #555;
+}

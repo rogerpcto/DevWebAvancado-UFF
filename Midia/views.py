@@ -472,14 +472,13 @@ def buscar_usuarios(request):
         if not nome_usuario:
             usuarios = Usuario.objects.all()
         else:
-            usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
+            usuarios = Usuario.objects.filter(first_name__icontains=nome_usuario)
         usuarios = usuarios.values("id", "first_name")
         return JsonResponse(list(usuarios), safe=False)
 
 
 
 def fazer_amizade(request):
-    if request.method == "GET":
         dados = request.POST
         id_amigo = dados.get("id_amigo")
         if id_amigo:
@@ -487,27 +486,28 @@ def fazer_amizade(request):
         if amigo:
             try:
                 Amigo.objects.create(usuario1=request.user, usuario2=amigo)
-                Amigo.objects.create(usuario1=amigo.user, usuario2=request.user)
+                amigos = Amigo.objects.filter(usuario1=request.user)
+                return render(request, "seguindo.html", {"usuario": request.user, "amigos": amigos})
             except Exception:
                 print(Exception)
 
 
 def desfazer_amizade(request):
-    if request.method == "DELETE":
         dados = request.POST
         id_amigo = dados.get("id_amigo")
+        usuario = Usuario.objects.get(username=request.user.username)
         amigo = Usuario.objects.get(id=id_amigo)
         try:
-            amizade1 = Amigo.get(usuario1=request.user, usuario2=amigo)
-            amizade2 = Amigo.get(usuario1=amigo, usuario2=request.user)
-        except Exception:
+            amizade1 = Amigo.objects.get(usuario1=usuario, usuario2=amigo)
+        except Exception as erro:
+            print(erro)
             return JsonResponse(
                 {"message": "Não foi encontrada amizade entre os usuários"},
                 status=401,
             )
         amizade1.delete()
-        amizade2.delete()
-        return JsonResponse({"message": "Amizade desfeita com sucesso!"}, status=200)
+        amigos = Amigo.objects.filter(usuario1=usuario)
+        return render(request,"seguindo.html", {"usuario": usuario,"amigos": amigos}) 
 
 
 def buscar_amigos(request):
@@ -621,13 +621,17 @@ def seguindo(request):
             response = requests.get(url, params=params)
             if response.status_code == 200:
                 usuarios = response.json()
-                # usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
         amigos = Amigo.objects.filter(usuario1=request.user)        
-        # return render(request, "seguindo.html", {"amigos": amigos, "usuarios": usuarios} )
-        # user = Usuario.objects.get(username=request.user.username)
-        # amigos = Amigo.objects.filter(usuario1=user)
+        for amigo in amigos:
+            print(amigo.usuario2.email) 
     return render(request, "seguindo.html", {"amigos": amigos, "usuarios":usuarios})
     
+def review_seguindo(request):
+    if request.method == "GET":
+        amigo  = Usuario.objects.get(id=request.GET.get("id_amigo"))
+        reviews = Review.objects.filter(usuario=amigo)
+        return render(request, "review_seguindo.html", {"amigo": amigo,"reviews": reviews})
+
 def get_details_review(request, id_review):
     if request.method == "GET":
         if id_review:

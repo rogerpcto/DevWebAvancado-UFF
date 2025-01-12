@@ -1,0 +1,25 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static 'Midia/css/review_seguindo.css' %}" />
+<h1>Reviews de {{ amigo.first_name }}</h1>
+
+{% if reviews %}
+<div class="reviews-container">
+  {% for review in reviews %}
+  <div class="review-card">
+   
+      <h2>{{ review.midia.titulo }}</h2>
+      <img
+        src="{{ review.midia.poster }}"
+        height="150px"
+        width="150px"
+        alt="Review Poster"
+      />
+      <p><strong>Nota:</strong> {{ review.nota }}</p>
+      <p>{{ review.comentario }}</p>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="no-reviews">Este usuário ainda não possui reviews.</p>
+{% endif %} {% endblock %}

@@ -13,8 +13,13 @@
       <h1>Seguindo</h1>
       <form method="get" action="{% url 'Midia:seguindo' %}">
         <div class="form-group">
-          <label for="search-user">Buscar Usuário:</label>
-          <input type="text" id="search-user" name="nome" required />
+          <input
+            type="text"
+            id="search-user"
+            name="nome"
+            placeholder="Busque um usuario"
+            required
+          />
           <button type="submit">Buscar</button>
         </div>
       </form>
@@ -22,38 +27,78 @@
       {% if usuarios %}
       <h2>Usuários Encontrados</h2>
       <div class="users-found">
-        {% if users_found|length > 0 %}
-        <ul>
-          {% for usuario in usuarios %}
-          <li>
-            {{ usuario.first_name }}
-            <form method="post" action="{% url 'Midia:amigos'%}">
-              {% csrf_token %}
-              <button type="submit">Seguir</button>
-            </form>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <p>Nenhum usuário encontrado.</p>
-        {% endif %}
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+              <td>{{ usuario.first_name }}</td>
+              <td>
+                <form method="post" action="{% url 'Midia:fazer_amizade'%}">
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="id_amigo"
+                    value="{{ usuario.id }}"
+                  />
+                  <button type="submit">Seguir</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
       {% else %}
-      <p>Faça uma busca para encontrar usuários.</p>
+      <p>Pesquise um usuário para seguir.</p>
       {% endif %}
 
       <h2>Usuários Seguindo</h2>
       <div class="following-users">
-        {% if following_users %}
-        <ul>
-          {% for user in following_users %}
-          <li>{{ user.username }}</li>
-          {% endfor %}
-        </ul>
+        {% if amigos %}
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for amigo in amigos %}
+            <tr>
+              <td>{{ amigo.usuario2.first_name }}</td>
+              <td style="display: flex; flex-direction: row; gap: 10px">
+                <form method="get" action="{% url 'Midia:review_seguindo' %}">
+                  <input
+                    type="hidden"
+                    name="id_amigo"
+                    value="{{ amigo.usuario2.id }}"
+                  />
+                  <button type="submit">Ver Reviews</button>
+                </form>
+                <form method="post" action="{% url 'Midia:desfazer_amizade' %}">
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="id_amigo"
+                    value="{{ amigo.usuario2.id }}"
+                  />
+                  <button type="submit">Deixar de Seguir</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
         {% else %}
         <p>Você não está seguindo ninguém.</p>
+        {% endif %}
       </div>
-      {% endif %}
     </div>
   </body>
 </html>

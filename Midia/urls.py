@@ -34,5 +34,8 @@ urlpatterns = [
         name="criar_episodios_temporada",
     ),
     path("seguindo", views.seguindo, name="seguindo"),
+    path("fazer_amizade", views.fazer_amizade, name="fazer_amizade"),
+    path("desfazer_amizade", views.desfazer_amizade, name="desfazer_amizade"),
     path("buscar_usuarios", views.buscar_usuarios, name="buscar_usuarios"),
+    path("review_seguindo", views.review_seguindo, name="review_seguindo"),
 ]
