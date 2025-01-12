@@ -104,15 +104,18 @@ def criar_conta(request):
 
         return redirect("/login")
 
-@login_required(login_url="/login")	
+
+@login_required(login_url="/login")
 def home(request):
     reviews = Review.objects.filter(usuario=request.user)
     return render(request, "home.html", {"reviews": reviews})
+
 
 @login_required(login_url="/login")
 def profile(request):
     user = Usuario.objects.get(username=request.user.username)
     return render(request, "profile.html", {"user": user})
+
 
 @login_required(login_url="/login")
 def buscar_filme(request):
@@ -133,7 +136,7 @@ def buscar_filme(request):
 
             response = requests.get(url, headers=HEADERS, params=query_string)
             if not response.content:
-                      return render(
+                return render(
                     request,
                     "buscar_filme.html",
                     {"midia": {}},
@@ -295,8 +298,7 @@ def salvar_midia(request):
 
         except Exception as erro:
             if "UNIQUE" in str(erro):
-                return JsonResponse(
-                    {"error": "Mídia já cadastrada"}, status=403)
+                return JsonResponse({"error": "Mídia já cadastrada"}, status=403)
             return JsonResponse({"error": str(erro)}, status=400)
 
     return JsonResponse(
@@ -406,30 +408,46 @@ def criar_episodios_temporada(request):
 @login_required(login_url="/login")
 def criar_review(request, id):
     if request.method == "GET":
-        
-        midia = Midia.objects.get(id_midia=id)
-        return render(request, "criar_review.html", {"midia": midia})
+        # se usuario ja tiver feito review daquela midia iria dar problema.
+        midia_id = request.GET.get("id_midia")
+        if midia_id:
+            midias = Midia.objects.all()
+            midia = Midia.objects.filter(id_midia=midia_id).first()
+            review = Review.objects.filter(midia=midia, usuario=request.user).first()
+            if review:
+                review.nota = int(review.nota)
+                return render(request, "editar_review.html", {"review": review})
+            else:
+                return render(
+                    request,
+                    "criar_review.html",
+                    {"midia_selecionada": midia, "midias": midias},
+                )
 
-    elif request.method == "POST":
-        dados = request.POST
-        midia_id = id
-        nota = dados.get("nota")
-        comentario = dados.get("comentario")
+    # elif request.method == "POST":
+    #     dados = request.POST
+    #     midia_id = dados.get("midia")
+    #     nota = dados.get("nota")
+    #     comentario = dados.get("comentario")
 
-        try:
-            midia = Midia.objects.get(id_midia=midia_id)
-            Review.objects.create(
-                usuario=request.user,
-                midia=midia,
-                nota=nota,
-                comentario=comentario,
-            )
-            messages.add_message(request, constants.SUCCESS, "Review adicionada com sucesso!")
-        except Exception as erro:
-            print(erro)
-            messages.add_message(request, constants.ERROR, "Não foi possível adicionar a review")
+    #     try:
+    #         midia = Midia.objects.get(id_midia=midia_id)
+    #         Review.objects.create(
+    #             usuario=request.user,
+    #             midia=midia,
+    #             nota=nota,
+    #             comentario=comentario,
+    #         )
+    #         messages.add_message(
+    #             request, constants.SUCCESS, "Review adicionada com sucesso!"
+    #         )
+    #     except Exception as erro:
+    #         print(erro)
+    #         messages.add_message(
+    #             request, constants.ERROR, "Não foi possível adicionar a review"
+    #         )
 
-        return redirect("Midia:home")
+    #     return redirect("/")
 
 
 def listar_reviews(request):
@@ -528,3 +546,82 @@ def buscar_amigos(request):
                 status=401,
             )
         return JsonResponse(amigos, safe=False)
+
+
+def review(request):
+
+    if request.method == "POST":
+        dados = request.POST
+        midia_id = dados.get("midia")
+        id_review = dados.get("id_review")
+        nota = dados.get("nota")
+        comentario = dados.get("comentario")
+        if midia_id:
+            try:
+                midia = Midia.objects.get(id_midia=midia_id)
+                Review.objects.create(
+                    usuario=request.user,
+                    midia=midia,
+                    nota=nota,
+                    comentario=comentario,
+                )
+                messages.add_message(
+                    request, constants.SUCCESS, "Review adicionada com sucesso!"
+                )
+            except Exception as erro:
+                print(erro)
+                messages.add_message(
+                    request, constants.ERROR, "Não foi possível adicionar a review"
+                )
+            return redirect("/")
+
+        elif id_review:
+            if id_review:
+                review = Review.objects.filter(id=id_review).first()
+                if review:
+                    if (
+                        request.user.perfil == "ADMINISTRADOR"
+                        or review.usuario.username == request.user.username
+                    ):
+                        review.comentario = comentario
+                        review.nota = nota
+                        review.save()
+                        return redirect("/")
+
+        elif request.POST.get("_method") == "DELETE":
+            review_id = request.GET.get("id_review", "")
+            if id_review:
+                review = Review.objects.filter(id=id_review).first()
+                if review:
+                    if (
+                        request.user.perfil == "ADMINISTRADOR"
+                        or review.usuario.username == request.user.username
+                    ):
+                        review.delete()
+                        return redirect("/")
+
+
+@csrf_exempt
+def get_review(request):
+    review_id = request.GET.get("id_review", "")
+    if not review_id:
+        return JsonResponse(
+            {"message": "O argumento id_review não existe"},
+            status=400,
+        )
+    review = Review.objects.filter(id=review_id).values().first()
+    if review:
+        return JsonResponse(review, safe=False, status=200)
+    else:
+        return JsonResponse(
+            {"message": f"Não existe Review com o id {review_id}"},
+            status=400,
+        )
+
+
+def get_details_review(request, id_review):
+    if request.method == "GET":
+        if id_review:
+            review = Review.objects.filter(id=id_review).first()
+            review.nota = int(review.nota)
+            return render(request, "editar_review.html", {"review": review})
