@@ -10,9 +10,9 @@ urlpatterns = [
     path("buscar_serie", views.buscar_serie, name="buscar_serie"),
     path("buscar_midia", views.buscar_midia, name="buscar_midia"),
     path("salvar_midia", views.salvar_midia, name="salvar_midia"),
-    # path("criar_review", views.criar_review, name="criar_review"),
+    path("buscar_usuarios", views.buscar_usuarios, name="buscar_usuarios"),
     path("review", views.review, name="review"),
-    # path("get_review", views.get_review, name="get_review"),
+    path("amigos", views.amigos, name="amigos"),
     path(
         "get_details_review/<int:id_review>/",
         views.get_details_review,

@@ -11,16 +11,10 @@
   <body>
     <div class="seguindo-container">
       <h1>Seguindo</h1>
-      <form method="  " action="{% url 'Midia:buscar_usuarios' %}">
-        {% csrf_token %}
+      <form method="get" action="{% url 'Midia:seguindo' %}">
         <div class="form-group">
-          <input
-            type="text"
-            id="search-user"
-            name="search_user"
-            placeholder="Busque alguem para seguir"
-            required
-          />
+          <label for="search-user">Buscar Usuário:</label>
+          <input type="text" id="search-user" name="nome" required />
           <button type="submit">Buscar</button>
         </div>
       </form>
@@ -30,10 +24,10 @@
       <div class="users-found">
         {% if users_found|length > 0 %}
         <ul>
-          {% for user in users_found %}
+          {% for usuario in usuarios %}
           <li>
-            {{ user.username }}
-            <form method="post" action="{% url 'Midia:follow_user' user.id %}">
+            {{ usuario.first_name }}
+            <form method="post" action="{% url 'Midia:amigos'%}">
               {% csrf_token %}
               <button type="submit">Seguir</button>
             </form>

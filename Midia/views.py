@@ -465,16 +465,17 @@ def criar_filme(request):
         except Exception as erro:
             return JsonResponse({"status": "error", "message": str(erro)}, status=400)
 
-
+@csrf_exempt
 def buscar_usuarios(request):
     if request.method == "GET":
         nome_usuario = request.GET.get("nome", "")
         if not nome_usuario:
             usuarios = Usuario.objects.all()
         else:
-            usuarios = Usuario.objects.filter(first_name=nome_usuario)
-        usuarios = list(usuarios.values)
-        return JsonResponse(usuarios, safe=False)
+            usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
+        usuarios = usuarios.values("id", "first_name")
+        return JsonResponse(list(usuarios), safe=False)
+
 
 
 def fazer_amizade(request):
@@ -581,6 +582,20 @@ def review(request):
                         review.save()
                         return redirect("/")
 
+
+def amigos(request):
+    if request.method == 'GET':
+        nome_usuario = request.GET.get("nome", "")
+        usuarios = None
+        if nome_usuario:
+            url = "http://localhost:8000/buscar_usuarios"
+            params = {"nome": nome_usuario}
+            response = requests.get(url, params=params)
+            if response.status_code == 200:
+                usuarios = response.json()
+                # usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
+        amigos = Amigo.objects.filter(usuario1=request.user)        
+        return render(request, "seguindo.html", {"amigos": amigos, "usuarios": usuarios} )
         
 
 
@@ -598,9 +613,20 @@ def deletar_review(request, id_review):
 
 def seguindo(request):
     if request.method == "GET":
-        user = Usuario.objects.get(username=request.user.username)
-        amigos = Amigo.objects.filter(usuario1=user)
-        return render(request, "seguindo.html", {"amigos": amigos})
+        nome_usuario = request.GET.get("nome", "")
+        usuarios = []
+        if nome_usuario:
+            url = "http://localhost:8000/buscar_usuarios"
+            params = {"nome": nome_usuario}
+            response = requests.get(url, params=params)
+            if response.status_code == 200:
+                usuarios = response.json()
+                # usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
+        amigos = Amigo.objects.filter(usuario1=request.user)        
+        # return render(request, "seguindo.html", {"amigos": amigos, "usuarios": usuarios} )
+        # user = Usuario.objects.get(username=request.user.username)
+        # amigos = Amigo.objects.filter(usuario1=user)
+    return render(request, "seguindo.html", {"amigos": amigos, "usuarios":usuarios})
     
 def get_details_review(request, id_review):
     if request.method == "GET":
