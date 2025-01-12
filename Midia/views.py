@@ -406,12 +406,11 @@ def criar_episodios_temporada(request):
 
 
 @login_required(login_url="/login")
-def criar_review(request, id):
+def criar_review(request):
     if request.method == "GET":
         # se usuario ja tiver feito review daquela midia iria dar problema.
         midia_id = request.GET.get("id_midia")
         if midia_id:
-            midias = Midia.objects.all()
             midia = Midia.objects.filter(id_midia=midia_id).first()
             review = Review.objects.filter(midia=midia, usuario=request.user).first()
             if review:
@@ -421,7 +420,7 @@ def criar_review(request, id):
                 return render(
                     request,
                     "criar_review.html",
-                    {"midia_selecionada": midia, "midias": midias},
+                    {"midia_selecionada": midia, "midia": midia},
                 )
 
     # elif request.method == "POST":
@@ -552,7 +551,7 @@ def review(request):
 
     if request.method == "POST":
         dados = request.POST
-        midia_id = dados.get("midia")
+        midia_id = dados.get("id_midia")
         id_review = dados.get("id_review")
         nota = dados.get("nota")
         comentario = dados.get("comentario")

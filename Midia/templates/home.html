@@ -12,27 +12,25 @@
     <!-- Header -->
     <header>
       <div class="container">
-        <nav>
+        <nav class="navbar">
+          <!-- Left navigation links -->
           <ul class="nav-list">
             <li>
               <a href="{% url 'Midia:buscar_filme' %}">Adicionar Review</a>
             </li>
             <li><a href="#">Amigos</a></li>
-            {% if user.is_authenticated %}
-            <li><a href="{% url 'Midia:logout' %}">Logout</a></li>
-            {% else %}
-            <li><a href="{% url 'Midia:login' %}">Login</a></li>
-            {% endif %}
           </ul>
 
-          <div class="greeting">
+          <!-- Right navigation with username and buttons -->
+          <div class="user-section">
             {% if user.is_authenticated %}
-            <span
-              >Olá,
-              <a href="{% url 'Midia:profile' %}" class="username-link"
-                >{{ user.username }}</a
-              >!</span
-            >
+            <span>
+              Olá, 
+              <a href="{% url 'Midia:profile' %}" class="username-link">{{ user.first_name }}</a>
+            </span>
+            <a href="{% url 'Midia:logout' %}" id="login-logout-btn" class="btn">Logout</a>
+            {% else %}
+            <a href="{% url 'Midia:login' %}" id="login-logout-btn" class="btn">Login</a>
             {% endif %}
           </div>
         </nav>
@@ -49,12 +47,11 @@
           {% for review in reviews %}
           <div class="review-card">
             <a href="{% url 'Midia:details_review' id_review=review.id %}">
-            <h2>{{ review.midia.titulo }}</h2>
-            <img src={{ review.midia.poster }} height="150px" width="150px"></img>
-            <p><strong>Nota:</strong> {{ review.nota }}</p>
-            <p>{{ review.comentario }}</p>
-
-            <!-- Like/Dislike Button -->
+              <h2>{{ review.midia.titulo }}</h2>
+              <img src={{ review.midia.poster }} height="150px" width="150px"></img>
+              <p><strong>Nota:</strong> {{ review.nota }}</p>
+              <p>{{ review.comentario }}</p>
+            </a>
           </div>
           {% endfor %}
         </div>

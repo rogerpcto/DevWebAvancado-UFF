@@ -12,12 +12,11 @@
       <h1>Editar Review</h1>
       <form method="post" action="{% url 'Midia:review' %}">
         {% csrf_token %}
-        <div class="form-group">
-          <label for="midia">Mídia:</label>
-          <select id="id_review" name="id_review" required>
-            <option value="{{ review.id }}">{{ review.midia.titulo }}</option>
-          </select>
-        </div>
+        <input type="hidden" name="id_review" value="{{ review.id }}" />
+        <h2 id="id_review" name="id_review" class="midia-title">
+          {{ review.midia.titulo }}
+        </h2>
+        <img src="{{ review.midia.poster }}" class="poster-img" />
         <div class="form-group">
           <label for="nota">Nota:</label>
           <input
@@ -29,16 +28,13 @@
             step="1"
             value="{{review.nota}}"
             required
-          />   
+          />
         </div>
         <div class="form-group">
           <label for="comentario">Comentário:</label>
-          <textarea
-            id="comentario"
-            name="comentario"
-            rows="4"
-            required
-          >{{ review.comentario }}</textarea>
+          <textarea id="comentario" name="comentario" rows="4" required>
+{{ review.comentario }}</textarea
+          >
         </div>
         <button type="submit">Editar Review</button>
       </form>

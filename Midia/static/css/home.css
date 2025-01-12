@@ -75,6 +75,7 @@ nav .nav-list li a:hover {
 
 nav .greeting {
   margin-left: auto; /* This makes sure the greeting goes to the right */
+  margin-right: 30px;
   color: #f39c12;
   font-weight: bold;
   font-size: 1rem; /* Reduced font size */
@@ -270,4 +271,31 @@ footer p {
 
 .back-arrow:hover {
   color: #3498db; /* Change to any color you like */
+}
+
+/* Ensure links inside .review-card are black */
+.review-card a {
+  text-decoration: none; /* Remove underline */
+  color: #333; /* Make the text black */
+}
+
+.review-card a:hover {
+  text-decoration: none; /* Prevent underline on hover */
+}
+
+/* Logout Button */
+#login-logout-btn {
+  background-color: transparent;
+  color: white; /* White text */
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none; /* Remove underline */
+  margin-left: 20px;
+  transition: color 0.3s ease;
+}
+
+#login-logout-btn:hover {
+  color: #f39c12; /* Hover color */
+  text-decoration: none; /* Ensure no underline on hover */
 }
