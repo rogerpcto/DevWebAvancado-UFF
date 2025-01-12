@@ -26,8 +26,13 @@
     <main>
       <div class="container">
         <h1>Editar Perfil</h1>
-        <form method="post" action="{}">
+        <form method="post" action="{% url 'Midia:profile' %}">
           {% csrf_token %}
+          <input
+          type="hidden"
+          name="username"
+          value="{{ request.user.username }}"
+          />
           <div class="form-group">
             <label for="name">Nome:</label>
             <input
@@ -51,15 +56,23 @@
             />
           </div>
           <div class="form-group">
-            <label for="username">Usuário:</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value="{{ user.username }}"
-              class="form-input"
-              required
-            />
+            <label for="perfil">Username:</label>
+            <p id="username" class="readonly-field">{{ user.username }}</p>
+          </div>
+          <div class="form-group">
+            <label for="perfil">Perfil:</label>
+            <select
+            id="perfil"
+            name="perfil"
+            class="form-input"
+            {% if request.user.perfil != "ADMINISTRADOR" %}disabled{% endif %}
+          >
+            {% for perfil in perfis %}
+              <option value="{{ perfil }}" {% if user.perfil == perfil %}selected{% endif %}>
+                {{ perfil }}
+              </option>
+            {% endfor %}
+          </select>
           </div>
           <button type="submit" class="btn-save">Salvar Alterações</button>
         </form>

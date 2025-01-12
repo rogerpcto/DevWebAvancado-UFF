@@ -4,15 +4,15 @@ from . import views
 app_name = "Midia"
 
 urlpatterns = [
-    path("", views.home, name="home"),
+    path("", views.review, name="home"),
     path("profile", views.profile, name="profile"),
     path("buscar_filme", views.buscar_filme, name="buscar_filme"),
     path("buscar_serie", views.buscar_serie, name="buscar_serie"),
     path("buscar_midia", views.buscar_midia, name="buscar_midia"),
     path("salvar_midia", views.salvar_midia, name="salvar_midia"),
-    path("criar_review", views.criar_review, name="criar_review"),
+    # path("criar_review", views.criar_review, name="criar_review"),
     path("review", views.review, name="review"),
-    path("get_review", views.get_review, name="get_review"),
+    # path("get_review", views.get_review, name="get_review"),
     path(
         "get_details_review/<int:id_review>/",
         views.get_details_review,

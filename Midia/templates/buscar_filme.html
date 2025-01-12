@@ -147,7 +147,7 @@
         .then(response => {
           console.log(response);
           if (response.status === 200 || response.status === 403) {
-            window.location.href = "{% url 'Midia:criar_review' %}?id_midia=" + (midia.id);
+            window.location.href = "{% url 'Midia:review' %}?id_midia=" + (midia.id);
           } else {
             throw new Error('Erro ao salvar a mídia.');
           }
