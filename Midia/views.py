@@ -111,7 +111,7 @@ def home(request):
 
 @login_required(login_url="/login")
 def profile(request):
-    user = Usuario.objects.get(username=request.user)
+    user = Usuario.objects.get(username=request.user.username)
     return render(request, "profile.html", {"user": user})
 
 @login_required(login_url="/login")
@@ -404,14 +404,15 @@ def criar_episodios_temporada(request):
 
 
 @login_required(login_url="/login")
-def criar_review(request):
+def criar_review(request, id):
     if request.method == "GET":
-        midias = Midia.objects.all()
-        return render(request, "criar_review.html", {"midias": midias})
+        
+        midia = Midia.objects.get(id_midia=id)
+        return render(request, "criar_review.html", {"midia": midia})
 
     elif request.method == "POST":
         dados = request.POST
-        midia_id = dados.get("midia")
+        midia_id = id
         nota = dados.get("nota")
         comentario = dados.get("comentario")
 
