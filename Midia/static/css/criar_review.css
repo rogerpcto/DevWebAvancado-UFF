@@ -1,23 +1,14 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px;
-}
-
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 1200px;
 }
 
 .adicionar-review-container {
+  margin-left: 50%;
   background-color: #fff;
   padding: 30px;
   border-radius: 8px;

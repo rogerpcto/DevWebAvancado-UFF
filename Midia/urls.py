@@ -18,6 +18,7 @@ urlpatterns = [
         views.get_details_review,
         name="details_review",
     ),
+    path("deletar_review/<int:id_review>/", views.deletar_review, name="deletar_review"),
     path("login", views.login, name="login"),
     path("logout", views.logout, name="logout"),
     path("criar_conta", views.criar_conta, name="criar_conta"),
@@ -32,4 +33,5 @@ urlpatterns = [
         views.criar_episodios_temporada,
         name="criar_episodios_temporada",
     ),
+    path("seguindo", views.seguindo, name="seguindo"),
 ]

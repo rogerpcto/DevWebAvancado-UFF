@@ -581,37 +581,27 @@ def review(request):
                         review.save()
                         return redirect("/")
 
-        elif request.POST.get("_method") == "DELETE":
-            review_id = request.GET.get("id_review", "")
-            if id_review:
-                review = Review.objects.filter(id=id_review).first()
-                if review:
-                    if (
-                        request.user.perfil == "ADMINISTRADOR"
-                        or review.usuario.username == request.user.username
-                    ):
-                        review.delete()
-                        return redirect("/")
+        
 
 
-# @csrf_exempt
-# def get_review(request):
-#     review_id = request.GET.get("id_review", "")
-#     if not review_id:
-#         return JsonResponse(
-#             {"message": "O argumento id_review não existe"},
-#             status=400,
-#         )
-#     review = Review.objects.filter(id=review_id).values().first()
-#     if review:
-#         return JsonResponse(review, safe=False, status=200)
-#     else:
-#         return JsonResponse(
-#             {"message": f"Não existe Review com o id {review_id}"},
-#             status=400,
-#         )
+def deletar_review(request, id_review):
+    if request.method == "POST":
+        review = Review.objects.filter(id=id_review).first()
+        if review:
+            if (
+                request.user.perfil == "ADMINISTRADOR"
+                or review.usuario.username == request.user.username
+            ):
+                review.delete()
+                return redirect("/")
 
 
+def seguindo(request):
+    if request.method == "GET":
+        user = Usuario.objects.get(username=request.user.username)
+        amigos = Amigo.objects.filter(usuario1=user)
+        return render(request, "seguindo.html", {"amigos": amigos})
+    
 def get_details_review(request, id_review):
     if request.method == "GET":
         if id_review:

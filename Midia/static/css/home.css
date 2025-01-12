@@ -7,7 +7,13 @@ body {
   color: #333;
 }
 
-.container {
+.header-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.header-container {
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
@@ -19,7 +25,6 @@ header {
   background-color: #333;
   padding: 5px 0; /* Reduced padding */
   color: white;
-  position: relative;
 }
 
 nav {

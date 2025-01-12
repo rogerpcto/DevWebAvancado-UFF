@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+{% load static %} {% block content %}
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static '/css/seguindo.css' %}" />
+    <title>Seguindo</title>
+  </head>
+  <body>
+    <div class="seguindo-container">
+      <h1>Seguindo</h1>
+      <form method="post" action="{% url 'Midia:seguindo' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="search-user">Buscar Usuário:</label>
+          <input type="text" id="search-user" name="search_user" required />
+          <button type="submit">Buscar</button>
+        </div>
+      </form>
+
+      <h2>Usuários Encontrados</h2>
+      <div class="users-found">
+        {% if users_found %}
+        <ul>
+          {% for user in users_found %}
+          <li>
+            {{ user.username }}
+            <form method="post" action="{% url 'Midia:follow_user' user.id %}">
+              {% csrf_token %}
+              <button type="submit">Seguir</button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Nenhum usuário encontrado.</p>
+        {% endif %}
+      </div>
+
+      <h2>Usuários que Estou Seguindo</h2>
+      <div class="following-users">
+        {% if following_users %}
+        <ul>
+          {% for user in following_users %}
+          <li>{{ user.username }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Você não está seguindo ninguém.</p>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
+{% endblock %}

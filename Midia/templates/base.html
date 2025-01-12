@@ -1,0 +1,73 @@
+<!-- base.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static '/css/home.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="header-container">
+        <nav class="navbar">
+          <ul class="nav-list">
+            <li>
+              <a href="/">Home</a>
+            </li>
+
+            <li>
+              <a href="{% url 'Midia:buscar_filme' %}">Adicionar Review</a>
+            </li>
+            <li><a href="{% url 'Midia:seguindo' %}">Seguindo</a></li>
+          </ul>
+
+          <div class="user-section">
+            {% if user.is_authenticated %}
+            <span>
+              Olá,
+              <a href="{% url 'Midia:profile' %}" class="username-link"
+                >{{ user.first_name }}</a
+              >
+            </span>
+            <a href="{% url 'Midia:logout' %}" id="login-logout-btn" class="btn"
+              >Logout</a
+            >
+            {% else %}
+            <a href="{% url 'Midia:login' %}" id="login-logout-btn" class="btn"
+              >Login</a
+            >
+            {% endif %}
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">{% block content %}{% endblock %}</div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-container">
+        <p>&copy; 2025 Desenvolvimento web avançado</p>
+      </div>
+    </footer>
+
+    <!-- Page Load Animation -->
+    <div id="page-loader" class="page-loader">
+      <div class="loader"></div>
+    </div>
+
+    <script>
+      window.addEventListener("load", function () {
+        document.getElementById("page-loader").style.display = "none";
+      });
+    </script>
+  </body>
+</html>
