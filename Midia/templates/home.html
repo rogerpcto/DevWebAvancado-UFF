@@ -48,6 +48,7 @@
         <div class="reviews-container">
           {% for review in reviews %}
           <div class="review-card">
+            <a href="{% url 'Midia:details_review' id_review=review.id %}">
             <h2>{{ review.midia.titulo }}</h2>
             <img src={{ review.midia.poster }} height="150px" width="150px"></img>
             <p><strong>Nota:</strong> {{ review.nota }}</p>
