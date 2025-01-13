@@ -38,4 +38,7 @@ urlpatterns = [
     path("desfazer_amizade", views.desfazer_amizade, name="desfazer_amizade"),
     path("buscar_usuarios", views.buscar_usuarios, name="buscar_usuarios"),
     path("review_seguindo", views.review_seguindo, name="review_seguindo"),
+    path("listar_amigos", views.listar_amigos, name="listar_amigos"),
+    path("criar_amizade", views.criar_amizade, name="criar_amizade"),
+    path("reviews", views.reviews, name="reviews"),
 ]

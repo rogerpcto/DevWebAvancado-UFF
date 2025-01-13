@@ -20,6 +20,7 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 import os
 from dotenv import load_dotenv
@@ -280,7 +281,7 @@ def buscar_midia(request):
         midias = list(midias.values())
         return JsonResponse(midias, safe=False)
 
-
+@csrf_exempt
 def salvar_midia(request):
     if request.method == "POST":
         try:
@@ -422,7 +423,6 @@ def criar_episodios_temporada(request):
             status=200,
         )
 
-
 def listar_reviews(request):
     if request.method == "GET":
         user_reviews = Review.objects.filter(usuario=request.user).order_by(
@@ -477,7 +477,6 @@ def buscar_usuarios(request):
         return JsonResponse(list(usuarios), safe=False)
 
 
-
 def fazer_amizade(request):
         dados = request.POST
         id_amigo = dados.get("id_amigo")
@@ -521,6 +520,36 @@ def buscar_amigos(request):
             )
         return JsonResponse(amigos, safe=False)
 
+@csrf_exempt
+def listar_amigos(request):
+    if request.method == "GET":
+        amigos = list(Amigo.objects.all().values("usuario1__first_name", "usuario2__first_name"))
+        if not amigos:
+            return JsonResponse({"message": "Nenhum amigo encontrado."}, status=404)
+        return JsonResponse({"amigos": amigos}, safe=False, status=200)
+
+@csrf_exempt    
+def criar_amizade(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            usuario1_id = data["usuario1"]
+            usuario2_id = data["usuario2"]
+
+            if Amigo.objects.filter(
+                (Q(usuario1_id=usuario1_id) & Q(usuario2_id=usuario2_id)) |
+                (Q(usuario1_id=usuario2_id) & Q(usuario2_id=usuario1_id))
+            ).exists():
+                return JsonResponse({"message": "Eles já são amigos."}, status=400)
+
+            amigo = Amigo.objects.create(usuario1_id=usuario1_id, usuario2_id=usuario2_id)
+
+            return JsonResponse({"message": "Amizade criada", "id": amigo.id}, status=201)
+        
+        except KeyError:
+            return JsonResponse({"error": "Campos 'usuario1' e 'usuario2' são obrigatórios."}, status=400)
+        except Exception as erro:
+            return JsonResponse({"error": str(erro)}, status=500)
 
 @login_required(login_url="/login")
 def review(request):
@@ -638,3 +667,37 @@ def get_details_review(request, id_review):
             review = Review.objects.filter(id=id_review).first()
             review.nota = int(review.nota)
             return render(request, "editar_review.html", {"review": review})
+
+@csrf_exempt
+def reviews(request):
+    if request.method == "GET":
+        midia_id = request.GET.get("midia_id")
+        
+        if midia_id:
+            reviews = Review.objects.filter(midia_id=midia_id).select_related("midia", "usuario")
+        else:
+            reviews = Review.objects.all().select_related("midia", "usuario")
+
+        formatted_reviews = []
+        for review in reviews:
+            formatted_reviews.append({
+                "usuario": {
+                    "first_name": review.usuario.first_name,
+                },
+                "comentario": review.comentario,
+                "nota": review.nota,
+                "midia": {
+                    "id": review.midia.id_midia,
+                    "titulo": review.midia.titulo,
+                    "data_lancamento": review.midia.data_lancamento,
+                    "nota": review.midia.nota,
+                    "genero": review.midia.genero,
+                    "poster": review.midia.poster,
+                }
+            })
+
+        return JsonResponse(formatted_reviews, safe=False)
+    elif request.method == "POST":
+        data = json.loads(request.body)
+        review = Review.objects.create(**data)
+        return JsonResponse({"message": "Review criada", "id": review.id}, status=201)
