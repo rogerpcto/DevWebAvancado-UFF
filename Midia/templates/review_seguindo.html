@@ -6,17 +6,27 @@
 <div class="reviews-container">
   {% for review in reviews %}
   <div class="review-card">
-   
-      <h2>{{ review.midia.titulo }}</h2>
-      <img
-        src="{{ review.midia.poster }}"
-        height="150px"
-        width="150px"
-        alt="Review Poster"
-      />
-      <p><strong>Nota:</strong> {{ review.nota }}</p>
-      <p>{{ review.comentario }}</p>
-    </a>
+    <h2>{{ review.midia.titulo }}</h2>
+    <img
+      src="{{ review.midia.poster }}"
+      height="150px"
+      width="150px"
+      alt="Review Poster"
+    />
+    <p><strong>Nota:</strong> {{ review.nota }}</p>
+    <p>{{ review.comentario }}</p>
+    <form method="POST" action="{% url 'Midia:deletar_review' review.id %}">
+      {% csrf_token %}
+      <button 
+        type="submit" 
+        class="delete-btn"
+        {% if not request.user.perfil == "ADMINISTRADOR" and not review.usuario.username == request.user.username %}
+          disabled
+        {% endif %}
+      >
+        <i class="fas fa-trash"></i>
+      </button>
+    </form>
   </div>
   {% endfor %}
 </div>

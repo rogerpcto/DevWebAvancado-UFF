@@ -25,15 +25,18 @@
               <a href="{% url 'Midia:buscar_filme' %}">Adicionar Review</a>
             </li>
             <li><a href="{% url 'Midia:seguindo' %}">Seguindo</a></li>
+            {% if request.user.perfil == "ADMINISTRADOR" %}
+            <li><a href="{% url 'Midia:usuarios' %}">Usuários</a></li>
+            {% endif %}
           </ul>
 
           <div class="user-section">
             {% if user.is_authenticated %}
             <span>
               Olá,
-              <a href="{% url 'Midia:profile' %}" class="username-link"
-                >{{ user.first_name }}</a
-              >
+              <a href="{% url 'Midia:profile' %}?id={{ user.id }}" class="username-link">
+                {{ request.user.first_name }}
+            </a>            
             </span>
             <a href="{% url 'Midia:logout' %}" id="login-logout-btn" class="btn"
               >Logout</a

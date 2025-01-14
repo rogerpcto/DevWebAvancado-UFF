@@ -20,10 +20,10 @@ class Usuario(AbstractUser):
 
 class Amigo(models.Model):
     usuario1 = models.ForeignKey(
-        Usuario, on_delete=models.DO_NOTHING, null=False, related_name="amigo_usuario1"
+        Usuario, on_delete=models.CASCADE, null=False, related_name="amigo_usuario1"
     )
     usuario2 = models.ForeignKey(
-        Usuario, on_delete=models.DO_NOTHING, null=False, related_name="amigo_usuario2"
+        Usuario, on_delete=models.CASCADE, null=False, related_name="amigo_usuario2"
     )
 
     def __str__(self):
@@ -43,7 +43,7 @@ class Midia(models.Model):
 
 
 class Review(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING, null=False)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=False)
     midia = models.ForeignKey(Midia, on_delete=models.DO_NOTHING, null=False)
     comentario = models.CharField(max_length=500, null=False)
     nota = models.FloatField(null=False)

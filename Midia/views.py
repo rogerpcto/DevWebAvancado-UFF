@@ -109,7 +109,8 @@ def criar_conta(request):
 @login_required(login_url="/login")
 def profile(request):
     if request.method == "GET":
-        user = Usuario.objects.get(username=request.user.username)
+        id_usuario = request.GET.get("id")
+        user = Usuario.objects.filter(id=id_usuario).first()
         return render(
             request,
             "profile.html",
@@ -612,7 +613,7 @@ def review(request):
                         return redirect("/")
 
 
-def amigos(request):
+def usuarios(request):
     if request.method == 'GET':
         nome_usuario = request.GET.get("nome", "")
         usuarios = None
@@ -622,9 +623,18 @@ def amigos(request):
             response = requests.get(url, params=params)
             if response.status_code == 200:
                 usuarios = response.json()
-                # usuarios = Usuario.objects.filter(first_name=nome_usuario.title())
-        amigos = Amigo.objects.filter(usuario1=request.user)        
-        return render(request, "seguindo.html", {"amigos": amigos, "usuarios": usuarios} )
+        return render(request, "usuarios.html", {"usuarios": usuarios} )
+
+
+def deletar_usuario(request):
+    if request.method == "POST":
+        if request.user.perfil == "ADMINISTRADOR":
+            id_usuario = request.POST.get("id")
+            usuario = Usuario.objects.filter(id=id_usuario).first()
+            if usuario:
+                usuario.delete()
+                return render(request, "usuarios.html", {"usuarios": None})
+
         
 
 

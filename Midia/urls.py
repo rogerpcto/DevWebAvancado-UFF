@@ -12,7 +12,8 @@ urlpatterns = [
     path("salvar_midia", views.salvar_midia, name="salvar_midia"),
     path("buscar_usuarios", views.buscar_usuarios, name="buscar_usuarios"),
     path("review", views.review, name="review"),
-    path("amigos", views.amigos, name="amigos"),
+    path("usuarios", views.usuarios, name="usuarios"),
+    path("deletar_usuario", views.deletar_usuario, name="deletar_usuario"),
     path(
         "get_details_review/<int:id_review>/",
         views.get_details_review,

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+{% load static %} {% block content %}
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static '/css/seguindo.css' %}" />
+    <title>Seguindo</title>
+  </head>
+  <body>
+    <div class="seguindo-container">
+      <h1>Usuários</h1>
+      <form method="get" action="{% url 'Midia:usuarios' %}">
+        <div class="form-group">
+          <input
+            type="text"
+            id="search-user"
+            name="nome"
+            placeholder="Busque um usuario"
+            required
+          />
+          <button type="submit">Buscar</button>
+        </div>
+      </form>
+
+      {% if usuarios %}
+      <h2>Usuários Encontrados</h2>
+      <div class="users-found">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+              <td>{{ usuario.first_name }}</td>
+              <td>
+                <form method="get" action="{% url 'Midia:profile'%}">
+                  <input
+                    type="hidden"
+                    name="id"
+                    value="{{ usuario.id }}"
+                  />
+                  <button type="submit">Ver detalhes do perfil</button>
+                </form>
+                {% if request.user.perfil == "ADMINISTRADOR" %}
+                <br>
+                <form method="post" action="{% url 'Midia:deletar_usuario' %}">
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="id"
+                    value="{{ usuario.id }}"
+                  />
+                  <button type="submit">Apagar usuário</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+  </body>
+</html>
+{% endblock %}
