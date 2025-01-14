@@ -522,30 +522,29 @@ def buscar_amigos(request):
         return JsonResponse(amigos, safe=False)
 
 @csrf_exempt
-def listar_amigos(request):
+def listar_seguidores(request):
     if request.method == "GET":
         amigos = list(Amigo.objects.all().values("usuario1__first_name", "usuario2__first_name"))
         if not amigos:
             return JsonResponse({"message": "Nenhum amigo encontrado."}, status=404)
-        return JsonResponse({"amigos": amigos}, safe=False, status=200)
+        return JsonResponse({"seguidores": amigos}, safe=False, status=200)
 
 @csrf_exempt    
-def criar_amizade(request):
+def seguir_usuario(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             usuario1_id = data["usuario1"]
             usuario2_id = data["usuario2"]
 
-            if Amigo.objects.filter(
-                (Q(usuario1_id=usuario1_id) & Q(usuario2_id=usuario2_id)) |
-                (Q(usuario1_id=usuario2_id) & Q(usuario2_id=usuario1_id))
-            ).exists():
-                return JsonResponse({"message": "Eles já são amigos."}, status=400)
+            usuario1= Usuario.objects.filter(id=usuario1_id).first()
+            usuario2= Usuario.objects.filter(id=usuario2_id).first()
+
+            if Amigo.objects.filter(usuario1=usuario1, usuario2=usuario2).exists():
+                return JsonResponse({"message": f"O usuário {usuario1_id} já segue o usuario {usuario2_id}."}, status=400)
 
             amigo = Amigo.objects.create(usuario1_id=usuario1_id, usuario2_id=usuario2_id)
-
-            return JsonResponse({"message": "Amizade criada", "id": amigo.id}, status=201)
+            return JsonResponse({"message": f"Usuário {usuario1_id} agora está seguindo usuário {usuario2_id}", "id": amigo.id}, status=201)
         
         except KeyError:
             return JsonResponse({"error": "Campos 'usuario1' e 'usuario2' são obrigatórios."}, status=400)
@@ -709,5 +708,8 @@ def reviews(request):
         return JsonResponse(formatted_reviews, safe=False)
     elif request.method == "POST":
         data = json.loads(request.body)
-        review = Review.objects.create(**data)
-        return JsonResponse({"message": "Review criada", "id": review.id}, status=201)
+        try:
+            review = Review.objects.create(**data)
+            return JsonResponse({"message": "Review criada", "id": review.id}, status=201)
+        except Exception as erro:
+            return JsonResponse({"message": "O usuário já criou uma review sobre essa midia"}, status=400)
