@@ -1,0 +1,215 @@
+{
+	"info": {
+		"_postman_id": "ab9c58ea-02d4-4ce3-b2b0-a110794c2c54",
+		"name": "Dev Web Avançado",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27989579"
+	},
+	"item": [
+		{
+			"name": "Buscar Midias",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/buscar_midia?nome=",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"buscar_midia"
+					],
+					"query": [
+						{
+							"key": "nome",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Salvar Midia",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"midia\":\r\n    {\r\n        \"titulo\":\"Deadpool: No Good Deed\",\r\n        \"data_lancamento\":\"2017-03-03\",\r\n        \"nota\":7.1,\r\n        \"genero\":[\"Ação\", \"Comédia\", \"Crime\"],\r\n        \"id\":558144,\r\n        \"poster\":\"https://jbsn-tvshow.azurewebsites.net/api/v1/image/wlKU9yB0Q8nfPMakBcSBT0JGS7.jpg\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/salvar_midia",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"salvar_midia"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Usuarios",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/buscar_usuarios",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"buscar_usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Seguidores",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/listar_seguidores",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"listar_seguidores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Seguir Usuario",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"usuario1\":1,\r\n    \"usuario2\":4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/seguir_usuario",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"seguir_usuario"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Reviews",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/reviews?midia_id=558144",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reviews"
+					],
+					"query": [
+						{
+							"key": "midia_id",
+							"value": "558144"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Criar Review",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"usuario_id\": 1,\r\n    \"midia_id\": 558144,\r\n    \"comentario\": \"Very nice!\",\r\n    \"nota\": 8.5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/reviews",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
