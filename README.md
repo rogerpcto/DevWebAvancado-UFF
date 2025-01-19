@@ -1,7 +1,8 @@
 # DevWebAvancado-UFF
 Trabalho da matéria de Desenvolvimento Web Avançado durante o curso de bacharelado de Sistemas de Informação. Consiste de um projeto de um sistema para avaliação e gerenciamento de Filmes e Séries assistidos pelos usuários.
-<br>
-<br>
+
+# Documentação
+A pasta documentação contém o relatório sobre as especificações do sistema, assim como anotações de reuniões do grupo, diagramas e projetos de Banco de Dados. Nessa pasta também se encontra a documentação da API em OpenAPI.
 
 # Configurando o Projeto
 
